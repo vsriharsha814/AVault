@@ -469,3 +469,35 @@ def export_reports(request):
     except Exception as e:
         messages.error(request, f'Export failed: {str(e)}')
         return redirect('inventory:reports')
+    
+
+@require_http_methods(["POST"])
+@login_required
+def add_category_ajax(request):
+    """AJAX endpoint to add a new category"""
+    try:
+        data = json.loads(request.body)
+        name = data.get('name', '').strip().upper()
+        
+        if not name:
+            return JsonResponse({'success': False, 'error': 'Category name is required'})
+        
+        # Check if category already exists
+        if Category.objects.filter(name=name).exists():
+            return JsonResponse({'success': False, 'error': 'A category with this name already exists'})
+        
+        # Create the category
+        category = Category.objects.create(name=name)
+        
+        return JsonResponse({
+            'success': True,
+            'category': {
+                'id': category.id,
+                'name': category.name
+            }
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
