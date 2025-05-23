@@ -19,11 +19,12 @@ urlpatterns = [
     path('sessions/create/', views.create_session, name='create_session'),
     path('sessions/<int:session_id>/conduct/', views.conduct_inventory, name='conduct_inventory'),
     
-    # Reports (updated and enhanced)
-    path('reports/', views.enhanced_reports, name='reports'),
+    # Reports 
+    path('reports/', views.reports, name='reports'),
+    path('reports/enhanced/', views.enhanced_reports, name='enhanced_reports'),
     path('reports/export/', views.export_reports, name='export_reports'),
     
-    # NEW: Semester-specific views
+    # Semester-specific views
     path('semester-history/', views.semester_history, name='semester_history'),
     path('semester-comparison/', views.semester_comparison, name='semester_comparison'),
     path('item/<int:item_id>/trends/', views.item_trend_analysis, name='item_trend_analysis'),

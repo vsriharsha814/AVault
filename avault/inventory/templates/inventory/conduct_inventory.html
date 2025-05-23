@@ -43,18 +43,18 @@
                     </thead>
                     <tbody>
                         {% for item in category.items.all %}
-                            {% with current_count=existing_counts|get_item:item.id %}
-                            <tr {% if current_count < item.expected_quantity %}class="shortage"{% endif %}>
+                            {% with current_count=existing_counts|get_item:item.id expected_qty=item.get_expected_quantity %}
+                            <tr {% if current_count < expected_qty %}class="shortage"{% endif %}>
                                 <td><strong>{{ item.name }}</strong></td>
                                 <td>{{ item.location|default:"-" }}</td>
-                                <td>{{ item.expected_quantity }}</td>
+                                <td>{{ expected_qty }}</td>
                                 <td>
                                     <input type="number" 
                                            name="count_{{ item.id }}" 
                                            class="form-control count-input" 
                                            value="{{ current_count|default:0 }}" 
                                            min="0"
-                                           data-expected="{{ item.expected_quantity }}">
+                                           data-expected="{{ expected_qty }}">
                                 </td>
                                 <td>{{ item.condition|default:"-" }}</td>
                                 <td>{{ item.serial_frequency|default:"-" }}</td>

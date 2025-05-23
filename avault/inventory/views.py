@@ -6,12 +6,300 @@ from django.db.models import Q
 from django.utils import timezone
 import pandas as pd
 from io import BytesIO
+import json
 
 from .models import Category, Item, AcademicTerm, HistoricalCount, InventorySession, InventoryCount
 from .forms import ItemForm, InventorySessionForm
 from .utils import import_excel_data, get_trend_analysis, generate_semester_comparison_report
 
-# ... (keep all existing views as they are) ...
+@login_required
+def dashboard(request):
+    """Main dashboard view"""
+    # Get search and filter parameters
+    search = request.GET.get('search', '')
+    category_filter = request.GET.get('category', '')
+    
+    # Base queryset
+    items = Item.objects.select_related('category').all()
+    
+    # Apply filters
+    if search:
+        items = items.filter(
+            Q(name__icontains=search) |
+            Q(location__icontains=search) |
+            Q(serial_frequency__icontains=search)
+        )
+    
+    if category_filter:
+        items = items.filter(category_id=category_filter)
+    
+    # Group items by category
+    items_by_category = {}
+    for item in items:
+        cat_name = item.category.name
+        if cat_name not in items_by_category:
+            items_by_category[cat_name] = []
+        items_by_category[cat_name].append(item)
+    
+    context = {
+        'items_by_category': items_by_category,
+        'categories': Category.objects.all(),
+        'search': search,
+        'category_filter': category_filter,
+        'total_items': Item.objects.count(),
+        'total_categories': Category.objects.count(),
+        'latest_session': InventorySession.objects.first(),
+    }
+    
+    return render(request, 'inventory/dashboard.html', context)
+
+@login_required
+def add_item(request):
+    """Add new inventory item"""
+    if request.method == 'POST':
+        form = ItemForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Item "{form.cleaned_data["name"]}" added successfully!')
+            return redirect('inventory:dashboard')
+    else:
+        form = ItemForm()
+    
+    return render(request, 'inventory/add_item.html', {'form': form})
+
+@login_required
+def edit_item(request, item_id):
+    """Edit existing inventory item"""
+    item = get_object_or_404(Item, id=item_id)
+    
+    if request.method == 'POST':
+        form = ItemForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Item "{item.name}" updated successfully!')
+            return redirect('inventory:dashboard')
+    else:
+        form = ItemForm(instance=item)
+    
+    return render(request, 'inventory/edit_item.html', {'form': form, 'item': item})
+
+@login_required
+def delete_item(request, item_id):
+    """Delete inventory item"""
+    item = get_object_or_404(Item, id=item_id)
+    
+    if request.method == 'POST':
+        item_name = item.name
+        item.delete()
+        messages.success(request, f'Item "{item_name}" deleted successfully!')
+    
+    return redirect('inventory:dashboard')
+
+@login_required
+def add_category_ajax(request):
+    """AJAX endpoint to add new categories"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            name = data.get('name', '').strip().upper()
+            
+            if not name:
+                return JsonResponse({'success': False, 'error': 'Category name is required'})
+            
+            if Category.objects.filter(name=name).exists():
+                return JsonResponse({'success': False, 'error': 'Category already exists'})
+            
+            category = Category.objects.create(name=name)
+            return JsonResponse({
+                'success': True,
+                'category': {
+                    'id': category.id,
+                    'name': category.name
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+@login_required
+def inventory_sessions(request):
+    """List all inventory sessions"""
+    sessions = InventorySession.objects.all()
+    return render(request, 'inventory/sessions.html', {'sessions': sessions})
+
+@login_required
+def create_session(request):
+    """Create new inventory session"""
+    if request.method == 'POST':
+        form = InventorySessionForm(request.POST)
+        if form.is_valid():
+            session = form.save(commit=False)
+            session.conducted_by = request.user
+            session.save()
+            messages.success(request, f'Session "{session.name}" created successfully!')
+            return redirect('inventory:conduct_inventory', session_id=session.id)
+    else:
+        form = InventorySessionForm()
+    
+    return render(request, 'inventory/create_session.html', {'form': form})
+
+@login_required
+def conduct_inventory(request, session_id):
+    """Conduct inventory counting session"""
+    session = get_object_or_404(InventorySession, id=session_id)
+    categories = Category.objects.prefetch_related('items').all()
+    
+    # Get existing counts for this session
+    existing_counts = {}
+    for count in InventoryCount.objects.filter(session=session):
+        existing_counts[count.item_id] = count.counted_quantity
+    
+    if request.method == 'POST':
+        # Process form data
+        for key, value in request.POST.items():
+            if key.startswith('count_'):
+                item_id = int(key.replace('count_', ''))
+                counted_quantity = int(value) if value.isdigit() else 0
+                
+                try:
+                    item = Item.objects.get(id=item_id)
+                    count, created = InventoryCount.objects.get_or_create(
+                        item=item,
+                        session=session,
+                        defaults={
+                            'counted_quantity': counted_quantity,
+                            'counted_by': request.user
+                        }
+                    )
+                    if not created:
+                        count.counted_quantity = counted_quantity
+                        count.counted_by = request.user
+                        count.save()
+                except Item.DoesNotExist:
+                    continue
+        
+        # Check if marking as complete
+        if 'mark_complete' in request.POST:
+            session.is_complete = True
+            session.save()
+            messages.success(request, f'Session "{session.name}" marked as complete!')
+            return redirect('inventory:inventory_sessions')
+        else:
+            messages.success(request, 'Counts saved successfully!')
+            return redirect('inventory:conduct_inventory', session_id=session.id)
+    
+    context = {
+        'session': session,
+        'categories': categories,
+        'existing_counts': existing_counts
+    }
+    
+    return render(request, 'inventory/conduct_inventory.html', context)
+
+@login_required
+def reports(request):
+    """Generate inventory reports"""
+    # Get the latest completed session
+    current_session = InventorySession.objects.filter(is_complete=True).first()
+    previous_session = InventorySession.objects.filter(is_complete=True).exclude(id=current_session.id).first() if current_session else None
+    
+    context = {
+        'current_session': current_session,
+        'previous_session': previous_session,
+        'total_items': Item.objects.count(),
+        'shortages': [],
+        'new_items': []
+    }
+    
+    if current_session:
+        # Calculate shortages
+        shortages = []
+        for count in current_session.counts.select_related('item'):
+            expected = count.item.get_expected_quantity()
+            if count.counted_quantity < expected:
+                shortages.append({
+                    'item': count.item,
+                    'expected': expected,
+                    'current_count': count.counted_quantity,
+                    'shortage': expected - count.counted_quantity
+                })
+        context['shortages'] = shortages
+        
+        # Calculate new items
+        if previous_session:
+            previous_item_ids = set(previous_session.counts.values_list('item_id', flat=True))
+            current_item_ids = set(current_session.counts.values_list('item_id', flat=True))
+            new_item_ids = current_item_ids - previous_item_ids
+            
+            new_items = []
+            for count in current_session.counts.filter(item_id__in=new_item_ids):
+                new_items.append({
+                    'item': count.item,
+                    'count': count.counted_quantity
+                })
+            context['new_items'] = new_items
+    
+    return render(request, 'inventory/reports.html', context)
+
+@login_required
+def export_reports(request):
+    """Export current reports to Excel"""
+    current_session = InventorySession.objects.filter(is_complete=True).first()
+    
+    if not current_session:
+        messages.error(request, 'No completed sessions found to export.')
+        return redirect('inventory:reports')
+    
+    # Create Excel file
+    output = BytesIO()
+    
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        # Current inventory sheet
+        current_data = []
+        for count in current_session.counts.select_related('item', 'item__category'):
+            current_data.append({
+                'Category': count.item.category.name,
+                'Item': count.item.name,
+                'Location': count.item.location or '',
+                'Current Count': count.counted_quantity,
+                'Expected': count.item.get_expected_quantity(),
+                'Condition': count.item.condition or '',
+                'Serial/Frequency': count.item.serial_frequency or ''
+            })
+        
+        if current_data:
+            df_current = pd.DataFrame(current_data)
+            df_current.to_excel(writer, sheet_name='Current Inventory', index=False)
+        
+        # Shortages sheet
+        shortages_data = []
+        for count in current_session.counts.select_related('item'):
+            expected = count.item.get_expected_quantity()
+            if count.counted_quantity < expected:
+                shortages_data.append({
+                    'Category': count.item.category.name,
+                    'Item': count.item.name,
+                    'Expected': expected,
+                    'Current': count.counted_quantity,
+                    'Shortage': expected - count.counted_quantity,
+                    'Location': count.item.location or ''
+                })
+        
+        if shortages_data:
+            df_shortages = pd.DataFrame(shortages_data)
+            df_shortages.to_excel(writer, sheet_name='Shortages', index=False)
+    
+    output.seek(0)
+    
+    response = HttpResponse(
+        output.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="inventory_report_{timezone.now().strftime("%Y%m%d_%H%M")}.xlsx"'
+    
+    return response
 
 @login_required
 def semester_history(request):
@@ -85,8 +373,8 @@ def item_trend_analysis(request, item_id):
     
     # Prepare chart data
     chart_data = {
-        'labels': [count.academic_term.name for count in historical_counts],
-        'data': [count.counted_quantity for count in historical_counts]
+        'labels': json.dumps([count.academic_term.name for count in historical_counts]),
+        'data': json.dumps([count.counted_quantity for count in historical_counts])
     }
     
     context = {
@@ -177,7 +465,7 @@ def enhanced_import_excel(request):
         except Exception as e:
             messages.error(request, f'Import failed: {str(e)}')
     
-    return render(request, 'inventory/enhanced_import.html')
+    return render(request, 'inventory/import_excel.html')
 
 @login_required
 def export_semester_data(request):
@@ -194,7 +482,7 @@ def export_semester_data(request):
         historical_data = []
         
         # Create column headers
-        columns = ['Item'] + [term.name for term in terms] + ['LOCATION', 'CONDITION', 'S/N - FREQUENCY']
+        columns = ['Item'] + [term.name for term in terms] + ['LOCATION', 'CONDITION', 'S/N-FREQUENCY']
         
         # Group items by category
         for category in Category.objects.all():
@@ -211,7 +499,7 @@ def export_semester_data(request):
                     'Item': item.name,
                     'LOCATION': item.location or '',
                     'CONDITION': item.condition or '',
-                    'S/N - FREQUENCY': item.serial_frequency or ''
+                    'S/N-FREQUENCY': item.serial_frequency or ''
                 }
                 
                 # Add historical counts for each term
@@ -280,7 +568,6 @@ def export_semester_data(request):
     
     return response
 
-# Add to URL patterns
 @login_required
 def ajax_get_term_data(request):
     """AJAX endpoint to get data for a specific term"""

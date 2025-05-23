@@ -1,6 +1,7 @@
 # inventory/utils.py
 import pandas as pd
 from django.utils import timezone
+from django.db import models
 from .models import Category, Item, AcademicTerm, HistoricalCount, InventorySession, InventoryCount
 import logging
 
@@ -180,9 +181,7 @@ def import_excel_data(excel_file):
                             item=item,
                             session=session,
                             defaults={
-                                'counted_quantity': historical_count.counted_quantity
-                            }
-                        )
+                                'counted_quantity': historical_count.counted_quantity})
         
         results['session_name'] = session.name
         results['academic_terms'] = list(academic_terms.keys())

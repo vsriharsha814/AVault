@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Item, InventorySession, InventoryCount
+from .models import Category, Item, InventorySession, InventoryCount, AcademicTerm, HistoricalCount
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -13,7 +13,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'location', 'condition', 'expected_quantity', 'latest_count', 'created_at']
+    list_display = ['name', 'category', 'location', 'condition', 'latest_count', 'created_at']
     list_filter = ['category', 'condition', 'location', 'created_at']
     search_fields = ['name', 'location', 'serial_frequency']
     ordering = ['category__name', 'name']
@@ -23,10 +23,25 @@ class ItemAdmin(admin.ModelAdmin):
         return obj.get_latest_count()
     latest_count.short_description = 'Latest Count'
 
+@admin.register(AcademicTerm)
+class AcademicTermAdmin(admin.ModelAdmin):
+    list_display = ['name', 'term', 'year', 'created_at']
+    list_filter = ['term', 'year']
+    search_fields = ['name']
+    ordering = ['-year', '-term']
+
+@admin.register(HistoricalCount)
+class HistoricalCountAdmin(admin.ModelAdmin):
+    list_display = ['item', 'academic_term', 'counted_quantity', 'imported_at']
+    list_filter = ['academic_term', 'imported_at']
+    search_fields = ['item__name', 'academic_term__name']
+    ordering = ['-academic_term__year', '-academic_term__term', 'item__name']
+    list_select_related = ['item', 'academic_term']
+
 @admin.register(InventorySession)
 class InventorySessionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'date', 'conducted_by', 'is_complete', 'completion_percentage', 'created_at']
-    list_filter = ['is_complete', 'date', 'conducted_by']
+    list_display = ['name', 'date', 'conducted_by', 'academic_term', 'is_complete', 'completion_percentage', 'created_at']
+    list_filter = ['is_complete', 'date', 'conducted_by', 'academic_term']
     search_fields = ['name']
     ordering = ['-date']
     

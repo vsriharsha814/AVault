@@ -53,14 +53,6 @@
                             <label for="{{ form.serial_frequency.id_for_label }}" class="form-label">Serial/Frequency</label>
                             {{ form.serial_frequency }}
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.expected_quantity.id_for_label }}" class="form-label">Expected Quantity *</label>
-                            {{ form.expected_quantity }}
-                            {% if form.expected_quantity.errors %}
-                                <div class="text-danger">{{ form.expected_quantity.errors }}</div>
-                            {% endif %}
-                        </div>
                     </div>
                     
                     <div class="mb-3">

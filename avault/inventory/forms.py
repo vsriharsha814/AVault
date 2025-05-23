@@ -1,4 +1,3 @@
-# inventory/forms.py
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import Item, Category, InventorySession
@@ -8,14 +7,13 @@ class ItemForm(forms.ModelForm):
     
     class Meta:
         model = Item
-        fields = ['name', 'category', 'location', 'condition', 'serial_frequency', 'expected_quantity', 'notes']
+        fields = ['name', 'category', 'location', 'condition', 'serial_frequency', 'notes']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Shure SM-57'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
             'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., GMB AV Closet'}),
             'condition': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Good, Fair, Needs Repair'}),
             'serial_frequency': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Serial number or frequency'}),
-            'expected_quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Additional notes...'})
         }
     
