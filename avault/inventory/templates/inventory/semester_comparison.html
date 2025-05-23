@@ -1,0 +1,263 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Semester Comparison - AVault{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <h2>Compare Semesters</h2>
+    <div>
+        <a href="{% url 'inventory:semester_history' %}" class="btn btn-info">
+            <i class="fas fa-history"></i> Back to History
+        </a>
+        <button onclick="window.print()" class="btn btn-secondary">
+            <i class="fas fa-print"></i> Print
+        </button>
+    </div>
+</div>
+
+<!-- Semester Selection -->
+<div class="card mb-4 no-print">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-5">
+                <label for="term1" class="form-label">First Semester (Earlier)</label>
+                <select name="term1" class="form-control">
+                    <option value="">Choose first semester...</option>
+                    {% for term in terms %}
+                        <option value="{{ term.id }}" {% if term.id|stringformat:"s" == term1_id %}selected{% endif %}>
+                            {{ term.name }} ({{ term.year }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label for="term2" class="form-label">Second Semester (Later)</label>
+                <select name="term2" class="form-control">
+                    <option value="">Choose second semester...</option>
+                    {% for term in terms %}
+                        <option value="{{ term.id }}" {% if term.id|stringformat:"s" == term2_id %}selected{% endif %}>
+                            {{ term.name }} ({{ term.year }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Compare</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if comparison %}
+    <!-- Comparison Header -->
+    <div class="alert alert-info">
+        <h5><i class="fas fa-balance-scale"></i> Comparing {{ term1.name }} vs {{ term2.name }}</h5>
+        <p class="mb-0">Analysis of inventory changes between {{ term1.name }} ({{ term1.year }}) and {{ term2.name }} ({{ term2.year }})</p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center border-success">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Items Added</h5>
+                    <h2 class="text-success">{{ comparison.items_added|length }}</h2>
+                    <small class="text-muted">New items appeared</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-danger">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Items Removed</h5>
+                    <h2 class="text-danger">{{ comparison.items_removed|length }}</h2>
+                    <small class="text-muted">Items no longer tracked</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-primary">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Quantity Increased</h5>
+                    <h2 class="text-primary">{{ comparison.items_increased|length }}</h2>
+                    <small class="text-muted">Items with more count</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-warning">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">Quantity Decreased</h5>
+                    <h2 class="text-warning">{{ comparison.items_decreased|length }}</h2>
+                    <small class="text-muted">Items with less count</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Items Added -->
+    {% if comparison.items_added %}
+    <div class="mb-5">
+        <h3 class="text-success">
+            <i class="fas fa-plus-circle"></i> Items Added ({{ comparison.items_added|length }})
+        </h3>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Item</th>
+                        <th>Count in {{ term2.name }}</th>
+                        <th>Location</th>
+                        <th>Condition</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item_data in comparison.items_added %}
+                        <tr class="overage">
+                            <td>{{ item_data.item.category.name }}</td>
+                            <td><strong>{{ item_data.item.name }}</strong></td>
+                            <td><span class="badge bg-success">{{ item_data.count }}</span></td>
+                            <td>{{ item_data.item.location|default:"-" }}</td>
+                            <td>{{ item_data.item.condition|default:"-" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Items Removed -->
+    {% if comparison.items_removed %}
+    <div class="mb-5">
+        <h3 class="text-danger">
+            <i class="fas fa-minus-circle"></i> Items Removed ({{ comparison.items_removed|length }})
+        </h3>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Item</th>
+                        <th>Previous Count ({{ term1.name }})</th>
+                        <th>Location</th>
+                        <th>Condition</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item_data in comparison.items_removed %}
+                        <tr class="shortage">
+                            <td>{{ item_data.item.category.name }}</td>
+                            <td><strong>{{ item_data.item.name }}</strong></td>
+                            <td><span class="badge bg-secondary">{{ item_data.previous_count }}</span></td>
+                            <td>{{ item_data.item.location|default:"-" }}</td>
+                            <td>{{ item_data.item.condition|default:"-" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Items with Increased Quantities -->
+    {% if comparison.items_increased %}
+    <div class="mb-5">
+        <h3 class="text-primary">
+            <i class="fas fa-arrow-up"></i> Quantity Increases ({{ comparison.items_increased|length }})
+        </h3>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Item</th>
+                        <th>{{ term1.name }}</th>
+                        <th>{{ term2.name }}</th>
+                        <th>Increase</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item_data in comparison.items_increased %}
+                        <tr class="overage">
+                            <td>{{ item_data.item.category.name }}</td>
+                            <td><strong>{{ item_data.item.name }}</strong></td>
+                            <td>{{ item_data.previous_count }}</td>
+                            <td><span class="badge bg-primary">{{ item_data.current_count }}</span></td>
+                            <td><span class="badge bg-success">+{{ item_data.increase }}</span></td>
+                            <td>{{ item_data.item.location|default:"-" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Items with Decreased Quantities -->
+    {% if comparison.items_decreased %}
+    <div class="mb-5">
+        <h3 class="text-warning">
+            <i class="fas fa-arrow-down"></i> Quantity Decreases ({{ comparison.items_decreased|length }})
+        </h3>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Item</th>
+                        <th>{{ term1.name }}</th>
+                        <th>{{ term2.name }}</th>
+                        <th>Decrease</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item_data in comparison.items_decreased %}
+                        <tr class="shortage">
+                            <td>{{ item_data.item.category.name }}</td>
+                            <td><strong>{{ item_data.item.name }}</strong></td>
+                            <td>{{ item_data.previous_count }}</td>
+                            <td><span class="badge bg-warning">{{ item_data.current_count }}</span></td>
+                            <td><span class="badge bg-danger">-{{ item_data.decrease }}</span></td>
+                            <td>{{ item_data.item.location|default:"-" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Stable Items Summary -->
+    {% if comparison.items_stable %}
+    <div class="mb-5">
+        <h3 class="text-muted">
+            <i class="fas fa-equals"></i> Stable Items ({{ comparison.items_stable|length }})
+        </h3>
+        <p class="text-muted">{{ comparison.items_stable|length }} items remained unchanged between these semesters.</p>
+    </div>
+    {% endif %}
+
+{% else %}
+    <!-- No Comparison Selected -->
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-balance-scale fa-3x text-muted mb-3"></i>
+                    <h4>Select Two Semesters to Compare</h4>
+                    <p class="text-muted">
+                        Choose two academic terms from the dropdowns above to see changes in inventory between them.
+                    </p>
+                    <p class="text-muted">
+                        <small>The comparison will show items added, removed, and quantity changes.</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

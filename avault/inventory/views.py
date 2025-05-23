@@ -1,287 +1,274 @@
-# inventory/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
 from django.utils import timezone
 import pandas as pd
 from io import BytesIO
 
-from .models import Category, Item, InventorySession, InventoryCount
+from .models import Category, Item, AcademicTerm, HistoricalCount, InventorySession, InventoryCount
 from .forms import ItemForm, InventorySessionForm
-from .utils import import_excel_data
+from .utils import import_excel_data, get_trend_analysis, generate_semester_comparison_report
 
-import json
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
-
-
+# ... (keep all existing views as they are) ...
 
 @login_required
-def dashboard(request):
-    """Main dashboard showing inventory overview"""
-    # Get search and filter parameters
-    search = request.GET.get('search', '')
-    category_filter = request.GET.get('category', '')
-    
-    # Base queryset
-    items = Item.objects.select_related('category').all()
-    
-    # Apply filters
-    if search:
-        items = items.filter(
-            Q(name__icontains=search) | 
-            Q(location__icontains=search) |
-            Q(serial_frequency__icontains=search)
-        )
-    
-    if category_filter:
-        items = items.filter(category_id=category_filter)
-    
-    # Get categories for filter dropdown
-    categories = Category.objects.all()
-    
-    # Get latest session info
-    latest_session = InventorySession.objects.first()
-    
-    # Group items by category for display
-    items_by_category = {}
-    for item in items:
-        cat_name = item.category.name
-        if cat_name not in items_by_category:
-            items_by_category[cat_name] = []
-        items_by_category[cat_name].append(item)
+def semester_history(request):
+    """View historical data by academic terms"""
+    terms = AcademicTerm.objects.all()
+    selected_term = request.GET.get('term')
     
     context = {
-        'items_by_category': items_by_category,
-        'categories': categories,
-        'search': search,
-        'category_filter': category_filter,
-        'latest_session': latest_session,
-        'total_items': Item.objects.count(),
-        'total_categories': Category.objects.count(),
+        'terms': terms,
+        'selected_term': selected_term
     }
     
-    return render(request, 'inventory/dashboard.html', context)
-
-@login_required
-def add_item(request):
-    """Add a new inventory item"""
-    if request.method == 'POST':
-        form = ItemForm(request.POST)
-        if form.is_valid():
-            item = form.save()
-            messages.success(request, f'Item "{item.name}" added successfully!')
-            return redirect('inventory:dashboard')
-    else:
-        form = ItemForm()
+    if selected_term:
+        term_obj = get_object_or_404(AcademicTerm, id=selected_term)
+        historical_counts = HistoricalCount.objects.filter(
+            academic_term=term_obj
+        ).select_related('item', 'item__category').order_by('item__category__name', 'item__name')
+        
+        # Group by category
+        counts_by_category = {}
+        for count in historical_counts:
+            cat_name = count.item.category.name
+            if cat_name not in counts_by_category:
+                counts_by_category[cat_name] = []
+            counts_by_category[cat_name].append(count)
+        
+        context.update({
+            'selected_term_obj': term_obj,
+            'counts_by_category': counts_by_category,
+            'total_items': historical_counts.count()
+        })
     
-    return render(request, 'inventory/add_item.html', {'form': form})
+    return render(request, 'inventory/semester_history.html', context)
 
 @login_required
-def edit_item(request, item_id):
-    """Edit an existing inventory item"""
+def semester_comparison(request):
+    """Compare inventory between two semesters"""
+    terms = AcademicTerm.objects.all()
+    term1_id = request.GET.get('term1')
+    term2_id = request.GET.get('term2')
+    
+    context = {
+        'terms': terms,
+        'term1_id': term1_id,
+        'term2_id': term2_id
+    }
+    
+    if term1_id and term2_id:
+        term1 = get_object_or_404(AcademicTerm, id=term1_id)
+        term2 = get_object_or_404(AcademicTerm, id=term2_id)
+        
+        # Get comparison data
+        comparison = generate_semester_comparison_report(term1.name, term2.name)
+        
+        context.update({
+            'term1': term1,
+            'term2': term2,
+            'comparison': comparison
+        })
+    
+    return render(request, 'inventory/semester_comparison.html', context)
+
+@login_required
+def item_trend_analysis(request, item_id):
+    """Show historical trends for a specific item"""
     item = get_object_or_404(Item, id=item_id)
     
-    if request.method == 'POST':
-        form = ItemForm(request.POST, instance=item)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Item "{item.name}" updated successfully!')
-            return redirect('inventory:dashboard')
-    else:
-        form = ItemForm(instance=item)
+    # Get historical data
+    historical_counts = item.get_count_history()
+    trend_data = get_trend_analysis(item)
     
-    return render(request, 'inventory/edit_item.html', {'form': form, 'item': item})
-
-@login_required
-def inventory_sessions(request):
-    """List all inventory sessions"""
-    sessions = InventorySession.objects.all()
-    return render(request, 'inventory/sessions.html', {'sessions': sessions})
-
-@login_required
-def create_session(request):
-    """Create a new inventory session"""
-    if request.method == 'POST':
-        form = InventorySessionForm(request.POST)
-        if form.is_valid():
-            session = form.save(commit=False)
-            session.conducted_by = request.user
-            session.save()
-            messages.success(request, f'Session "{session.name}" created!')
-            return redirect('inventory:conduct_inventory', session_id=session.id)
-    else:
-        form = InventorySessionForm()
-    
-    return render(request, 'inventory/create_session.html', {'form': form})
-
-@login_required
-def conduct_inventory(request, session_id):
-    """Conduct inventory counting for a session"""
-    session = get_object_or_404(InventorySession, id=session_id)
-    
-    # Group items by category
-    categories = Category.objects.prefetch_related('items').all()
-    
-    # Get existing counts for this session
-    existing_counts = {
-        count.item_id: count.counted_quantity 
-        for count in InventoryCount.objects.filter(session=session)
+    # Prepare chart data
+    chart_data = {
+        'labels': [count.academic_term.name for count in historical_counts],
+        'data': [count.counted_quantity for count in historical_counts]
     }
-    
-    if request.method == 'POST':
-        # Process the count form
-        counts_saved = 0
-        for key, value in request.POST.items():
-            if key.startswith('count_'):
-                item_id = int(key.split('_')[1])
-                try:
-                    quantity = int(value) if value else 0
-                    count, created = InventoryCount.objects.update_or_create(
-                        item_id=item_id,
-                        session=session,
-                        defaults={
-                            'counted_quantity': quantity,
-                            'counted_by': request.user
-                        }
-                    )
-                    counts_saved += 1
-                except (ValueError, Item.DoesNotExist):
-                    continue
-        
-        messages.success(request, f'Saved {counts_saved} inventory counts!')
-        
-        # Mark session as complete if requested
-        if 'mark_complete' in request.POST:
-            session.is_complete = True
-            session.save()
-            messages.success(request, f'Session "{session.name}" marked as complete!')
-            return redirect('inventory:inventory_sessions')
     
     context = {
-        'session': session,
-        'categories': categories,
-        'existing_counts': existing_counts,
+        'item': item,
+        'historical_counts': historical_counts,
+        'trend_data': trend_data,
+        'chart_data': chart_data
     }
     
-    return render(request, 'inventory/conduct_inventory.html', context)
+    return render(request, 'inventory/item_trend.html', context)
 
 @login_required
-def reports(request):
-    """Generate reports"""
-    # Get the latest two sessions for comparison
-    sessions = InventorySession.objects.filter(is_complete=True)[:2]
+def enhanced_reports(request):
+    """Enhanced reports with semester analysis"""
+    # Get the latest completed session
+    current_session = InventorySession.objects.filter(is_complete=True).first()
     
-    if len(sessions) < 1:
-        messages.warning(request, 'Need at least 1 completed session to generate reports.')
-        return render(request, 'inventory/reports.html', {'sessions': sessions})
-    
-    current_session = sessions[0]
-    previous_session = sessions[1] if len(sessions) > 1 else None
-    
-    # Get shortages and new items
-    shortages = []
-    new_items = []
-    
-    current_counts = {
-        c.item_id: c.counted_quantity 
-        for c in InventoryCount.objects.filter(session=current_session)
-    }
-    
-    previous_counts = {}
-    if previous_session:
-        previous_counts = {
-            c.item_id: c.counted_quantity 
-            for c in InventoryCount.objects.filter(session=previous_session)
-        }
-    
-    # Find shortages and new items
-    for item in Item.objects.select_related('category').all():
-        current_count = current_counts.get(item.id, 0)
-        previous_count = previous_counts.get(item.id, 0) if previous_session else 0
-        
-        # Shortage if current count is less than expected
-        if current_count < item.expected_quantity:
-            shortages.append({
-                'item': item,
-                'current_count': current_count,
-                'expected': item.expected_quantity,
-                'shortage': item.expected_quantity - current_count
-            })
-        
-        # New item if it wasn't in previous session (or no previous session)
-        if not previous_session or (item.id not in previous_counts and current_count > 0):
-            new_items.append({
-                'item': item,
-                'count': current_count
-            })
+    # Get latest two academic terms for comparison
+    latest_terms = AcademicTerm.objects.all()[:2]
     
     context = {
         'current_session': current_session,
-        'previous_session': previous_session,
-        'shortages': shortages,
-        'new_items': new_items,
-        'sessions': sessions,
+        'latest_terms': latest_terms,
+        'total_items': Item.objects.count(),
+        'total_terms': AcademicTerm.objects.count()
     }
     
-    return render(request, 'inventory/reports.html', context)
+    if current_session and len(latest_terms) >= 2:
+        # Generate semester comparison
+        comparison = generate_semester_comparison_report(
+            latest_terms[1].name,  # Previous term
+            latest_terms[0].name   # Latest term
+        )
+        context['semester_comparison'] = comparison
+    
+    # Get items with trends (increasing/decreasing over time)
+    trending_items = []
+    for item in Item.objects.select_related('category').all():
+        trend_data = get_trend_analysis(item, num_terms=3)
+        if trend_data and trend_data['trend'] != 'stable':
+            trending_items.append({
+                'item': item,
+                'trend': trend_data
+            })
+    
+    context['trending_items'] = trending_items[:10]  # Top 10 trending items
+    
+    # Get items with no recent activity
+    if latest_terms:
+        latest_term = latest_terms[0]
+        items_no_recent_activity = Item.objects.exclude(
+            historical_counts__academic_term=latest_term
+        ).select_related('category')[:10]
+        
+        context['items_no_recent_activity'] = items_no_recent_activity
+    
+    return render(request, 'inventory/enhanced_reports.html', context)
 
 @user_passes_test(lambda u: u.is_staff)
-def import_excel(request):
-    """Import data from Excel file (admin only)"""
+def enhanced_import_excel(request):
+    """Enhanced Excel import with semester support"""
     if request.method == 'POST' and request.FILES.get('excel_file'):
         try:
             excel_file = request.FILES['excel_file']
             result = import_excel_data(excel_file)
-            messages.success(request, f'Successfully imported: {result["categories"]} categories, {result["items"]} items, {result["counts"]} counts')
-            return redirect('inventory:dashboard')
+            
+            # Create success message with details
+            success_msg = f"""
+            Successfully imported:
+            • {result['categories_created']} new categories
+            • {result['items_created']} new items  
+            • {result['terms_created']} new academic terms
+            • {result['historical_counts_created']} historical counts
+            • Academic terms: {', '.join(result['academic_terms'])}
+            """
+            
+            if result['errors']:
+                success_msg += f"\n• {len(result['errors'])} errors encountered"
+            
+            messages.success(request, success_msg)
+            
+            if result['errors']:
+                for error in result['errors'][:5]:  # Show first 5 errors
+                    messages.warning(request, f"Import warning: {error}")
+            
+            return redirect('inventory:semester_history')
+            
         except Exception as e:
             messages.error(request, f'Import failed: {str(e)}')
     
-    return render(request, 'inventory/import_excel.html')
+    return render(request, 'inventory/enhanced_import.html')
 
 @login_required
-def export_reports(request):
-    """Export reports to Excel"""
-    # Create Excel file with multiple sheets
+def export_semester_data(request):
+    """Export data with full semester history"""
+    # Get all terms and items
+    terms = AcademicTerm.objects.all().order_by('year', 'term')
+    items = Item.objects.select_related('category').all()
+    
+    # Create Excel file
     output = BytesIO()
     
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        # All items sheet
-        items_data = []
-        for item in Item.objects.select_related('category').all():
-            items_data.append({
-                'Category': item.category.name,
-                'Item': item.name,
-                'Location': item.location,
-                'Condition': item.condition,
-                'Serial/Frequency': item.serial_frequency,
-                'Expected Quantity': item.expected_quantity,
-                'Latest Count': item.get_latest_count(),
-            })
+        # Historical Data Sheet (recreating original Excel format)
+        historical_data = []
         
-        if items_data:
-            df_items = pd.DataFrame(items_data)
-            df_items.to_excel(writer, sheet_name='All Items', index=False)
+        # Create column headers
+        columns = ['Item'] + [term.name for term in terms] + ['LOCATION', 'CONDITION', 'S/N - FREQUENCY']
         
-        # Shortages sheet
-        shortages_data = []
-        for item in Item.objects.select_related('category').all():
-            if item.has_shortage():
-                shortages_data.append({
+        # Group items by category
+        for category in Category.objects.all():
+            # Add category header row
+            row_data = {'Item': category.name}
+            for col in columns[1:]:
+                row_data[col] = ''
+            historical_data.append(row_data)
+            
+            # Add items in this category
+            category_items = items.filter(category=category)
+            for item in category_items:
+                row_data = {
+                    'Item': item.name,
+                    'LOCATION': item.location or '',
+                    'CONDITION': item.condition or '',
+                    'S/N - FREQUENCY': item.serial_frequency or ''
+                }
+                
+                # Add historical counts for each term
+                for term in terms:
+                    count = item.get_count_for_term(term)
+                    row_data[term.name] = count if count > 0 else ''
+                
+                historical_data.append(row_data)
+            
+            # Add empty row after each category
+            empty_row = {col: '' for col in columns}
+            historical_data.append(empty_row)
+        
+        # Create DataFrame and export
+        if historical_data:
+            df_historical = pd.DataFrame(historical_data)
+            df_historical = df_historical.reindex(columns=columns)
+            df_historical.to_excel(writer, sheet_name='Historical Inventory', index=False)
+        
+        # Trends Analysis Sheet
+        trends_data = []
+        for item in items:
+            trend_data = get_trend_analysis(item)
+            if trend_data:
+                trends_data.append({
                     'Category': item.category.name,
                     'Item': item.name,
-                    'Location': item.location,
-                    'Expected': item.expected_quantity,
-                    'Current Count': item.get_latest_count(),
-                    'Shortage': item.expected_quantity - item.get_latest_count(),
+                    'Current Count': trend_data['latest_count'],
+                    'Previous Count': trend_data['previous_count'],
+                    'Trend': trend_data['trend'],
+                    'Change': trend_data['change'],
+                    'Location': item.location or ''
                 })
         
-        if shortages_data:
-            df_shortages = pd.DataFrame(shortages_data)
-            df_shortages.to_excel(writer, sheet_name='Shortages', index=False)
+        if trends_data:
+            df_trends = pd.DataFrame(trends_data)
+            df_trends.to_excel(writer, sheet_name='Trends Analysis', index=False)
+        
+        # Semester Summary Sheet
+        summary_data = []
+        for term in terms:
+            counts = HistoricalCount.objects.filter(academic_term=term)
+            total_items = counts.count()
+            total_quantity = sum(count.counted_quantity for count in counts)
+            
+            summary_data.append({
+                'Academic Term': term.name,
+                'Year': term.year,
+                'Season': term.term,
+                'Total Items': total_items,
+                'Total Quantity': total_quantity,
+                'Average per Item': round(total_quantity / total_items, 2) if total_items > 0 else 0
+            })
+        
+        if summary_data:
+            df_summary = pd.DataFrame(summary_data)
+            df_summary.to_excel(writer, sheet_name='Semester Summary', index=False)
     
     output.seek(0)
     
@@ -289,215 +276,43 @@ def export_reports(request):
         output.read(),
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    response['Content-Disposition'] = f'attachment; filename="avault_report_{timezone.now().strftime("%Y%m%d")}.xlsx"'
+    response['Content-Disposition'] = f'attachment; filename="avault_full_history_{timezone.now().strftime("%Y%m%d_%H%M")}.xlsx"'
     
     return response
 
+# Add to URL patterns
 @login_required
-def delete_item(request, item_id):
-    """Delete an inventory item"""
-    item = get_object_or_404(Item, id=item_id)
+def ajax_get_term_data(request):
+    """AJAX endpoint to get data for a specific term"""
+    term_id = request.GET.get('term_id')
+    if not term_id:
+        return JsonResponse({'error': 'Term ID required'})
     
-    if request.method == 'POST':
-        item_name = item.name
-        item.delete()
-        messages.success(request, f'Item "{item_name}" has been deleted.')
-        return redirect('inventory:dashboard')
-    
-    # If not POST, redirect to edit page (shouldn't happen with proper form)
-    return redirect('inventory:edit_item', item_id=item_id)
-
-@login_required
-def reports(request):
-    """Generate reports with proper context"""
-    # Get the latest two sessions for comparison
-    sessions = list(InventorySession.objects.filter(is_complete=True).order_by('-date')[:2])
-    
-    if len(sessions) < 1:
-        context = {
-            'current_session': None,
-            'previous_session': None,
-            'shortages': [],
-            'new_items': [],
-            'total_items': Item.objects.count(),
-        }
-        return render(request, 'inventory/reports.html', context)
-    
-    current_session = sessions[0]
-    previous_session = sessions[1] if len(sessions) > 1 else None
-    
-    # Get all items with their current counts
-    all_items = Item.objects.select_related('category').all()
-    
-    # Get counts for current session
-    current_counts = {
-        c.item_id: c.counted_quantity 
-        for c in InventoryCount.objects.filter(session=current_session)
-    }
-    
-    # Get counts for previous session if it exists
-    previous_counts = {}
-    if previous_session:
-        previous_counts = {
-            c.item_id: c.counted_quantity 
-            for c in InventoryCount.objects.filter(session=previous_session)
-        }
-    
-    # Calculate shortages and new items
-    shortages = []
-    new_items = []
-    
-    for item in all_items:
-        current_count = current_counts.get(item.id, 0)
-        previous_count = previous_counts.get(item.id, 0) if previous_session else 0
+    try:
+        term = AcademicTerm.objects.get(id=term_id)
+        counts = HistoricalCount.objects.filter(academic_term=term).select_related(
+            'item', 'item__category'
+        )
         
-        # Check for shortages (current count less than expected)
-        if current_count < item.expected_quantity:
-            shortages.append({
-                'item': item,
-                'current_count': current_count,
-                'expected': item.expected_quantity,
-                'shortage': item.expected_quantity - current_count
+        data = []
+        for count in counts:
+            data.append({
+                'item_id': count.item.id,
+                'item_name': count.item.name,
+                'category': count.item.category.name,
+                'count': count.counted_quantity,
+                'location': count.item.location or '',
+                'condition': count.item.condition or ''
             })
         
-        # Check for new items (not in previous session or added after previous session)
-        if previous_session:
-            # Item is new if it wasn't counted in previous session but has a current count
-            if item.id not in previous_counts and current_count > 0:
-                new_items.append({
-                    'item': item,
-                    'count': current_count
-                })
-            # Or if the item was created after the previous session
-            elif item.created_at.date() > previous_session.date and current_count > 0:
-                new_items.append({
-                    'item': item,
-                    'count': current_count
-                })
-        else:
-            # If no previous session, all items with counts are "new"
-            if current_count > 0:
-                new_items.append({
-                    'item': item,
-                    'count': current_count
-                })
-    
-    context = {
-        'current_session': current_session,
-        'previous_session': previous_session,
-        'shortages': shortages,
-        'new_items': new_items,
-        'total_items': all_items.count(),
-    }
-    
-    return render(request, 'inventory/reports.html', context)
-
-# Update the existing export_reports function to handle edge cases better
-@login_required
-def export_reports(request):
-    """Export reports to Excel with improved error handling"""
-    try:
-        # Create Excel file with multiple sheets
-        output = BytesIO()
-        
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            # All items sheet
-            items_data = []
-            for item in Item.objects.select_related('category').all():
-                items_data.append({
-                    'Category': item.category.name,
-                    'Item': item.name,
-                    'Location': item.location or '',
-                    'Condition': item.condition or '',
-                    'Serial/Frequency': item.serial_frequency or '',
-                    'Expected Quantity': item.expected_quantity,
-                    'Latest Count': item.get_latest_count(),
-                    'Has Shortage': 'Yes' if item.has_shortage() else 'No',
-                })
-            
-            if items_data:
-                df_items = pd.DataFrame(items_data)
-                df_items.to_excel(writer, sheet_name='All Items', index=False)
-            
-            # Shortages sheet
-            shortages_data = []
-            for item in Item.objects.select_related('category').all():
-                if item.has_shortage():
-                    shortages_data.append({
-                        'Category': item.category.name,
-                        'Item': item.name,
-                        'Location': item.location or '',
-                        'Expected': item.expected_quantity,
-                        'Current Count': item.get_latest_count(),
-                        'Shortage Amount': item.expected_quantity - item.get_latest_count(),
-                    })
-            
-            if shortages_data:
-                df_shortages = pd.DataFrame(shortages_data)
-                df_shortages.to_excel(writer, sheet_name='Shortages', index=False)
-            else:
-                # Create empty sheet with headers
-                df_empty = pd.DataFrame(columns=['Category', 'Item', 'Location', 'Expected', 'Current Count', 'Shortage Amount'])
-                df_empty.to_excel(writer, sheet_name='Shortages', index=False)
-            
-            # Sessions sheet
-            sessions_data = []
-            for session in InventorySession.objects.all():
-                sessions_data.append({
-                    'Session Name': session.name,
-                    'Date': session.date,
-                    'Conducted By': session.conducted_by.username if session.conducted_by else '',
-                    'Complete': 'Yes' if session.is_complete else 'No',
-                    'Completion %': session.get_completion_percentage(),
-                    'Items Counted': session.counts.count(),
-                })
-            
-            if sessions_data:
-                df_sessions = pd.DataFrame(sessions_data)
-                df_sessions.to_excel(writer, sheet_name='Sessions', index=False)
-        
-        output.seek(0)
-        
-        response = HttpResponse(
-            output.read(),
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-        response['Content-Disposition'] = f'attachment; filename="avault_report_{timezone.now().strftime("%Y%m%d_%H%M")}.xlsx"'
-        
-        return response
-        
-    except Exception as e:
-        messages.error(request, f'Export failed: {str(e)}')
-        return redirect('inventory:reports')
-    
-
-@require_http_methods(["POST"])
-@login_required
-def add_category_ajax(request):
-    """AJAX endpoint to add a new category"""
-    try:
-        data = json.loads(request.body)
-        name = data.get('name', '').strip().upper()
-        
-        if not name:
-            return JsonResponse({'success': False, 'error': 'Category name is required'})
-        
-        # Check if category already exists
-        if Category.objects.filter(name=name).exists():
-            return JsonResponse({'success': False, 'error': 'A category with this name already exists'})
-        
-        # Create the category
-        category = Category.objects.create(name=name)
-        
         return JsonResponse({
-            'success': True,
-            'category': {
-                'id': category.id,
-                'name': category.name
-            }
+            'term': term.name,
+            'data': data,
+            'total_items': len(data),
+            'total_quantity': sum(item['count'] for item in data)
         })
         
-    except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+    except AcademicTerm.DoesNotExist:
+        return JsonResponse({'error': 'Term not found'})
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
+        return JsonResponse({'error': str(e)})

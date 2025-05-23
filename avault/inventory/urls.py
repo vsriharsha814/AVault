@@ -12,16 +12,23 @@ urlpatterns = [
     
     # AJAX endpoints
     path('add-category-ajax/', views.add_category_ajax, name='add_category_ajax'),
+    path('ajax/term-data/', views.ajax_get_term_data, name='ajax_get_term_data'),
     
     # Inventory sessions
     path('sessions/', views.inventory_sessions, name='inventory_sessions'),
     path('sessions/create/', views.create_session, name='create_session'),
     path('sessions/<int:session_id>/conduct/', views.conduct_inventory, name='conduct_inventory'),
     
-    # Reports
-    path('reports/', views.reports, name='reports'),
+    # Reports (updated and enhanced)
+    path('reports/', views.enhanced_reports, name='reports'),
     path('reports/export/', views.export_reports, name='export_reports'),
     
-    # Admin functions
-    path('import/', views.import_excel, name='import_excel'),
+    # NEW: Semester-specific views
+    path('semester-history/', views.semester_history, name='semester_history'),
+    path('semester-comparison/', views.semester_comparison, name='semester_comparison'),
+    path('item/<int:item_id>/trends/', views.item_trend_analysis, name='item_trend_analysis'),
+    
+    # Enhanced import and export
+    path('import/', views.enhanced_import_excel, name='import_excel'),
+    path('export-semester-data/', views.export_semester_data, name='export_semester_data'),
 ]

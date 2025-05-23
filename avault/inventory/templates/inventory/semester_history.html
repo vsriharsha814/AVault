@@ -1,0 +1,161 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Semester History - AVault{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <h2>Inventory History by Semester</h2>
+    <div>
+        <a href="{% url 'inventory:semester_comparison' %}" class="btn btn-info">
+            <i class="fas fa-balance-scale"></i> Compare Semesters
+        </a>
+        <a href="{% url 'inventory:export_semester_data' %}" class="btn btn-success">
+            <i class="fas fa-download"></i> Export History
+        </a>
+        <button onclick="window.print()" class="btn btn-secondary">
+            <i class="fas fa-print"></i> Print
+        </button>
+    </div>
+</div>
+
+<!-- Semester Selection -->
+<div class="card mb-4 no-print">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-8">
+                <label for="term" class="form-label">Select Academic Term</label>
+                <select name="term" class="form-control" onchange="this.form.submit()">
+                    <option value="">Choose a semester...</option>
+                    {% for term in terms %}
+                        <option value="{{ term.id }}" {% if term.id|stringformat:"s" == selected_term %}selected{% endif %}>
+                            {{ term.name }} ({{ term.year }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <a href="{% url 'inventory:semester_history' %}" class="btn btn-outline-secondary">Clear Selection</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if selected_term_obj %}
+    <!-- Selected Term Summary -->
+    <div class="alert alert-info">
+        <h5><i class="fas fa-calendar"></i> {{ selected_term_obj.name }} Summary</h5>
+        <div class="row">
+            <div class="col-md-3">
+                <strong>Total Items:</strong> {{ total_items }}
+            </div>
+            <div class="col-md-3">
+                <strong>Academic Year:</strong> {{ selected_term_obj.year }}
+            </div>
+            <div class="col-md-3">
+                <strong>Term:</strong> {{ selected_term_obj.get_term_display }}
+            </div>
+            <div class="col-md-3">
+                <strong>Categories:</strong> {{ counts_by_category|length }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Historical Inventory Data -->
+    {% if counts_by_category %}
+        {% for category_name, counts in counts_by_category.items %}
+            <div class="mb-4">
+                <h3 class="category-header p-3 rounded">{{ category_name }}</h3>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Count</th>
+                                <th>Location</th>
+                                <th>Condition</th>
+                                <th>Serial/Frequency</th>
+                                <th class="no-print">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for count in counts %}
+                                <tr>
+                                    <td><strong>{{ count.item.name }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-primary fs-6">{{ count.counted_quantity }}</span>
+                                    </td>
+                                    <td>{{ count.item.location|default:"-" }}</td>
+                                    <td>{{ count.item.condition|default:"-" }}</td>
+                                    <td>{{ count.item.serial_frequency|default:"-" }}</td>
+                                    <td class="no-print">
+                                        <a href="{% url 'inventory:item_trend_analysis' count.item.id %}" 
+                                           class="btn btn-sm btn-outline-info" title="View Trends">
+                                            <i class="fas fa-chart-line"></i>
+                                        </a>
+                                        <a href="{% url 'inventory:edit_item' count.item.id %}" 
+                                           class="btn btn-sm btn-outline-primary" title="Edit Item">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> 
+            No inventory data found for {{ selected_term_obj.name }}.
+        </div>
+    {% endif %}
+
+{% else %}
+    <!-- No Term Selected -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                    <h4>Select an Academic Term</h4>
+                    <p class="text-muted">
+                        Choose a semester from the dropdown above to view historical inventory data.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Available Terms</h5>
+                </div>
+                <div class="card-body">
+                    {% if terms %}
+                        <ul class="list-unstyled">
+                            {% for term in terms|slice:":10" %}
+                                <li class="mb-2">
+                                    <a href="?term={{ term.id }}" class="text-decoration-none">
+                                        <i class="fas fa-calendar"></i> {{ term.name }}
+                                        <small class="text-muted">({{ term.year }})</small>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                            {% if terms|length > 10 %}
+                                <li><small class="text-muted">... and {{ terms|length|add:"-10" }} more</small></li>
+                            {% endif %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No academic terms found. Import data from Excel to get started.</p>
+                        {% if user.is_staff %}
+                            <a href="{% url 'inventory:import_excel' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-upload"></i> Import Data
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
