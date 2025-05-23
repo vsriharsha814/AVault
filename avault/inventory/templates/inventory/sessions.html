@@ -1,0 +1,391 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Inventory Sessions - AVault{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Inventory Sessions</h2>
+    <a href="{% url 'inventory:create_session' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> New Session
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Session Name</th>
+                <th>Date</th>
+                <th>Conducted By</th>
+                <th>Status</th>
+                <th>Completion</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+                <tr>
+                    <td><strong>{{ session.name }}</strong></td>
+                    <td>{{ session.date }}</td>
+                    <td>{{ session.conducted_by.username|default:"-" }}</td>
+                    <td>
+                        {% if session.is_complete %}
+                            <span class="badge bg-success">Complete</span>
+                        {% else %}
+                            <span class="badge bg-warning">In Progress</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ session.get_completion_percentage }}%</td>
+                    <td>
+                        <a href="{% url 'inventory:conduct_inventory' session.id %}" class="btn btn-sm btn-outline-primary">
+                            {% if session.is_complete %}View{% else %}Continue{% endif %}
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        No inventory sessions yet. <a href="{% url 'inventory:create_session' %}">Create your first session</a>.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+<!-- inventory/templates/inventory/create_session.html -->
+{% extends 'inventory/base.html' %}
+
+{% block title %}New Inventory Session - AVault{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2>Create New Inventory Session</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Session Name *</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="text-danger">{{ form.name.errors }}</div>
+                {% endif %}
+                <div class="form-text">e.g., "Summer 2025", "Fall 2025"</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.date.id_for_label }}" class="form-label">Date *</label>
+                {{ form.date }}
+                {% if form.date.errors %}
+                    <div class="text-danger">{{ form.date.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                {{ form.notes }}
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Create Session</button>
+                <a href="{% url 'inventory:inventory_sessions' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+<!-- inventory/templates/inventory/conduct_inventory.html -->
+{% extends 'inventory/base.html' %}
+
+{% block title %}Conduct Inventory: {{ session.name }} - AVault{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <h2>Inventory Count: {{ session.name }}</h2>
+    <div>
+        <button onclick="window.print()" class="btn btn-secondary">
+            <i class="fas fa-print"></i> Print
+        </button>
+    </div>
+</div>
+
+<div class="alert alert-info no-print">
+    <h6>Instructions:</h6>
+    <ul class="mb-0">
+        <li>Count each item and enter the quantity in the "Count" column</li>
+        <li>Red background indicates items that are below expected quantity</li>
+        <li>Save frequently to avoid losing data</li>
+        <li>Mark session as complete when all counting is finished</li>
+    </ul>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    
+    {% for category in categories %}
+        <div class="mb-4">
+            <h4 class="category-header p-2 rounded">{{ category.name }}</h4>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%">Item</th>
+                            <th>Location</th>
+                            <th>Expected</th>
+                            <th>Count</th>
+                            <th>Condition</th>
+                            <th>Serial/Frequency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in category.items.all %}
+                            {% with current_count=existing_counts|get_item:item.id %}
+                            <tr {% if current_count < item.expected_quantity %}class="shortage"{% endif %}>
+                                <td><strong>{{ item.name }}</strong></td>
+                                <td>{{ item.location|default:"-" }}</td>
+                                <td>{{ item.expected_quantity }}</td>
+                                <td>
+                                    <input type="number" 
+                                           name="count_{{ item.id }}" 
+                                           class="form-control count-input" 
+                                           value="{{ current_count|default:0 }}" 
+                                           min="0"
+                                           data-expected="{{ item.expected_quantity }}">
+                                </td>
+                                <td>{{ item.condition|default:"-" }}</td>
+                                <td>{{ item.serial_frequency|default:"-" }}</td>
+                            </tr>
+                            {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+    
+    <div class="d-flex gap-2 no-print">
+        <button type="submit" class="btn btn-primary">Save Counts</button>
+        <button type="submit" name="mark_complete" class="btn btn-success">Save & Mark Complete</button>
+        <a href="{% url 'inventory:inventory_sessions' %}" class="btn btn-secondary">Back to Sessions</a>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Highlight discrepancies as user types
+    const inputs = document.querySelectorAll('.count-input');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const expected = parseInt(this.dataset.expected);
+            const current = parseInt(this.value) || 0;
+            const row = this.closest('tr');
+            
+            if (current < expected) {
+                row.classList.add('shortage');
+            } else {
+                row.classList.remove('shortage');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+
+<!-- inventory/templates/inventory/reports.html -->
+{% extends 'inventory/base.html' %}
+
+{% block title %}Reports - AVault{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <h2>Inventory Reports</h2>
+    <div>
+        <a href="{% url 'inventory:export_reports' %}" class="btn btn-success">
+            <i class="fas fa-download"></i> Export Excel
+        </a>
+        <button onclick="window.print()" class="btn btn-secondary">
+            <i class="fas fa-print"></i> Print
+        </button>
+    </div>
+</div>
+
+{% if current_session %}
+    <div class="alert alert-info">
+        <h6>Report based on session: {{ current_session.name }} ({{ current_session.date }})</h6>
+        {% if previous_session %}
+            <p class="mb-0">Compared with: {{ previous_session.name }} ({{ previous_session.date }})</p>
+        {% endif %}
+    </div>
+
+    <!-- Shortages Section -->
+    <div class="mb-5">
+        <h3 class="text-danger">
+            <i class="fas fa-exclamation-triangle"></i> Shortages ({{ shortages|length }})
+        </h3>
+        {% if shortages %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Item</th>
+                            <th>Location</th>
+                            <th>Expected</th>
+                            <th>Current</th>
+                            <th>Shortage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for shortage in shortages %}
+                            <tr class="shortage">
+                                <td>{{ shortage.item.category.name }}</td>
+                                <td><strong>{{ shortage.item.name }}</strong></td>
+                                <td>{{ shortage.item.location|default:"-" }}</td>
+                                <td>{{ shortage.expected }}</td>
+                                <td>{{ shortage.current_count }}</td>
+                                <td class="text-danger fw-bold">{{ shortage.shortage }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-success">🎉 No shortages found! All items meet expected quantities.</p>
+        {% endif %}
+    </div>
+
+    <!-- New Items Section -->
+    {% if previous_session %}
+    <div class="mb-5">
+        <h3 class="text-primary">
+            <i class="fas fa-plus-circle"></i> New Items ({{ new_items|length }})
+        </h3>
+        {% if new_items %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Item</th>
+                            <th>Location</th>
+                            <th>Count</th>
+                            <th>Condition</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for new_item in new_items %}
+                            <tr class="overage">
+                                <td>{{ new_item.item.category.name }}</td>
+                                <td><strong>{{ new_item.item.name }}</strong></td>
+                                <td>{{ new_item.item.location|default:"-" }}</td>
+                                <td>{{ new_item.count }}</td>
+                                <td>{{ new_item.item.condition|default:"-" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No new items since the last inventory session.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+{% else %}
+    <div class="alert alert-warning">
+        <h5>No completed inventory sessions found</h5>
+        <p>Complete at least one inventory session to generate reports.</p>
+        <a href="{% url 'inventory:create_session' %}" class="btn btn-primary">Start New Session</a>
+    </div>
+{% endif %}
+{% endblock %}
+
+<!-- inventory/templates/inventory/import_excel.html -->
+{% extends 'inventory/base.html' %}
+
+{% block title %}Import Excel - AVault{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2>Import Inventory from Excel</h2>
+        
+        <div class="alert alert-warning">
+            <h6>Before importing:</h6>
+            <ul class="mb-0">
+                <li>Make sure your Excel file follows the same structure as your original inventory</li>
+                <li>Categories should be in rows with no count data</li>
+                <li>Items should have count data in semester columns</li>
+                <li>This will create new categories and items, or update existing ones</li>
+            </ul>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="excel_file" class="form-label">Excel File *</label>
+                <input type="file" name="excel_file" class="form-control" accept=".xlsx,.xls" required>
+                <div class="form-text">Upload your inventory Excel file (.xlsx or .xls format)</div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Import Data</button>
+                <a href="{% url 'inventory:dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+<!-- inventory/templates/registration/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AVault</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title text-center mb-4">
+                            <i class="fas fa-microphone"></i> AVault Login
+                        </h3>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            {% if form.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.errors }}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                                {{ form.username|add_class:"form-control" }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+                                {{ form.password|add_class:"form-control" }}
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
