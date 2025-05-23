@@ -1,0 +1,144 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Reports - AVault{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <h2>Inventory Reports</h2>
+    <div>
+        <a href="{% url 'inventory:export_reports' %}" class="btn btn-success">
+            <i class="fas fa-download"></i> Export Excel
+        </a>
+        <button onclick="window.print()" class="btn btn-secondary">
+            <i class="fas fa-print"></i> Print
+        </button>
+    </div>
+</div>
+
+{% if current_session %}
+    <div class="alert alert-info">
+        <h6>Report based on session: {{ current_session.name }} ({{ current_session.date }})</h6>
+        {% if previous_session %}
+            <p class="mb-0">Compared with: {{ previous_session.name }} ({{ previous_session.date }})</p>
+        {% endif %}
+    </div>
+
+    <!-- Shortages Section -->
+    <div class="mb-5">
+        <h3 class="text-danger">
+            <i class="fas fa-exclamation-triangle"></i> Shortages ({{ shortages|length }})
+        </h3>
+        {% if shortages %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Item</th>
+                            <th>Location</th>
+                            <th>Expected</th>
+                            <th>Current</th>
+                            <th>Shortage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for shortage in shortages %}
+                            <tr class="shortage">
+                                <td>{{ shortage.item.category.name }}</td>
+                                <td><strong>{{ shortage.item.name }}</strong></td>
+                                <td>{{ shortage.item.location|default:"-" }}</td>
+                                <td>{{ shortage.expected }}</td>
+                                <td>{{ shortage.current_count }}</td>
+                                <td class="text-danger fw-bold">{{ shortage.shortage }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-success">🎉 No shortages found! All items meet expected quantities.</p>
+        {% endif %}
+    </div>
+
+    <!-- New Items Section -->
+    {% if previous_session %}
+    <div class="mb-5">
+        <h3 class="text-primary">
+            <i class="fas fa-plus-circle"></i> New Items ({{ new_items|length }})
+        </h3>
+        {% if new_items %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Item</th>
+                            <th>Location</th>
+                            <th>Count</th>
+                            <th>Condition</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for new_item in new_items %}
+                            <tr class="overage">
+                                <td>{{ new_item.item.category.name }}</td>
+                                <td><strong>{{ new_item.item.name }}</strong></td>
+                                <td>{{ new_item.item.location|default:"-" }}</td>
+                                <td>{{ new_item.count }}</td>
+                                <td>{{ new_item.item.condition|default:"-" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No new items since the last inventory session.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+{% else %}
+    <div class="alert alert-warning">
+        <h5>No completed inventory sessions found</h5>
+        <p>Complete at least one inventory session to generate reports.</p>
+        <a href="{% url 'inventory:create_session' %}" class="btn btn-primary">Start New Session</a>
+    </div>
+{% endif %}
+{% endblock %}
+
+<!-- inventory/templates/inventory/import_excel.html -->
+{% extends 'inventory/base.html' %}
+
+{% block title %}Import Excel - AVault{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2>Import Inventory from Excel</h2>
+        
+        <div class="alert alert-warning">
+            <h6>Before importing:</h6>
+            <ul class="mb-0">
+                <li>Make sure your Excel file follows the same structure as your original inventory</li>
+                <li>Categories should be in rows with no count data</li>
+                <li>Items should have count data in semester columns</li>
+                <li>This will create new categories and items, or update existing ones</li>
+            </ul>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="excel_file" class="form-label">Excel File *</label>
+                <input type="file" name="excel_file" class="form-control" accept=".xlsx,.xls" required>
+                <div class="form-text">Upload your inventory Excel file (.xlsx or .xls format)</div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Import Data</button>
+                <a href="{% url 'inventory:dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

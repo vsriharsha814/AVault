@@ -1,0 +1,98 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Conduct Inventory: {{ session.name }} - AVault{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <h2>Inventory Count: {{ session.name }}</h2>
+    <div>
+        <button onclick="window.print()" class="btn btn-secondary">
+            <i class="fas fa-print"></i> Print
+        </button>
+    </div>
+</div>
+
+<div class="alert alert-info no-print">
+    <h6>Instructions:</h6>
+    <ul class="mb-0">
+        <li>Count each item and enter the quantity in the "Count" column</li>
+        <li>Red background indicates items that are below expected quantity</li>
+        <li>Save frequently to avoid losing data</li>
+        <li>Mark session as complete when all counting is finished</li>
+    </ul>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    
+    {% for category in categories %}
+        <div class="mb-4">
+            <h4 class="category-header p-2 rounded">{{ category.name }}</h4>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%">Item</th>
+                            <th>Location</th>
+                            <th>Expected</th>
+                            <th>Count</th>
+                            <th>Condition</th>
+                            <th>Serial/Frequency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in category.items.all %}
+                            {% with current_count=existing_counts|get_item:item.id %}
+                            <tr {% if current_count < item.expected_quantity %}class="shortage"{% endif %}>
+                                <td><strong>{{ item.name }}</strong></td>
+                                <td>{{ item.location|default:"-" }}</td>
+                                <td>{{ item.expected_quantity }}</td>
+                                <td>
+                                    <input type="number" 
+                                           name="count_{{ item.id }}" 
+                                           class="form-control count-input" 
+                                           value="{{ current_count|default:0 }}" 
+                                           min="0"
+                                           data-expected="{{ item.expected_quantity }}">
+                                </td>
+                                <td>{{ item.condition|default:"-" }}</td>
+                                <td>{{ item.serial_frequency|default:"-" }}</td>
+                            </tr>
+                            {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+    
+    <div class="d-flex gap-2 no-print">
+        <button type="submit" class="btn btn-primary">Save Counts</button>
+        <button type="submit" name="mark_complete" class="btn btn-success">Save & Mark Complete</button>
+        <a href="{% url 'inventory:inventory_sessions' %}" class="btn btn-secondary">Back to Sessions</a>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Highlight discrepancies as user types
+    const inputs = document.querySelectorAll('.count-input');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const expected = parseInt(this.dataset.expected);
+            const current = parseInt(this.value) || 0;
+            const row = this.closest('tr');
+            
+            if (current < expected) {
+                row.classList.add('shortage');
+            } else {
+                row.classList.remove('shortage');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
