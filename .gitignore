@@ -1,4 +1,62 @@
+# Folders
 venv
 logs
-__pycache__/
+
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
 *.py[cod]
+
+# C extensions
+*.so
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+static_root/
+local_settings.py
+.env
+.env.*
+
+# Unit test / coverage reports
+htmlcov/
+.coverage
+.tox/
+.nox/
+.cache/
+coverage.xml
+*.cover
+.hypothesis/
+
+# MyPy / Pyre type checker
+.mypy_cache/
+.pyre/
+
+# Pytest
+.pytest_cache/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# macOS / Linux / Windows system files
+.DS_Store
+Thumbs.db
+
+# Pipenv / Poetry / Virtualenv
+Pipfile.lock
+poetry.lock
+*.egg-info/
+.eggs/
+.env/
+venv/
+ENV/
+env/
