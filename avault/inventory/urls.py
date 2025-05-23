@@ -1,4 +1,3 @@
-# inventory/urls.py
 from django.urls import path
 from . import views
 
@@ -9,6 +8,9 @@ urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('add-item/', views.add_item, name='add_item'),
     path('edit-item/<int:item_id>/', views.edit_item, name='edit_item'),
+    
+    # AJAX endpoints
+    path('add-category-ajax/', views.add_category_ajax, name='add_category_ajax'),
     
     # Inventory sessions
     path('sessions/', views.inventory_sessions, name='inventory_sessions'),

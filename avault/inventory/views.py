@@ -12,6 +12,41 @@ from .models import Category, Item, InventorySession, InventoryCount
 from .forms import ItemForm, InventorySessionForm
 from .utils import import_excel_data
 
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+
+@login_required
+@require_http_methods(["POST"])
+def add_category_ajax(request):
+    """AJAX endpoint to add new category"""
+    try:
+        data = json.loads(request.body)
+        name = data.get('name', '').strip().upper()
+        
+        if not name:
+            return JsonResponse({'success': False, 'error': 'Category name is required'})
+        
+        # Check if category already exists
+        if Category.objects.filter(name=name).exists():
+            return JsonResponse({'success': False, 'error': 'Category already exists'})
+        
+        # Create new category
+        category = Category.objects.create(name=name)
+        
+        return JsonResponse({
+            'success': True,
+            'category': {
+                'id': category.id,
+                'name': category.name
+            }
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
 @login_required
 def dashboard(request):
     """Main dashboard showing inventory overview"""
