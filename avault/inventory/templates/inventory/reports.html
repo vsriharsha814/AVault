@@ -23,6 +23,42 @@
         {% endif %}
     </div>
 
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Shortages</h5>
+                    <h2 class="text-danger">{{ shortages|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">New Items</h5>
+                    <h2 class="text-primary">{{ new_items|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Items</h5>
+                    <h2 class="text-info">{{ total_items }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Completion</h5>
+                    <h2 class="text-success">{{ current_session.get_completion_percentage }}%</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Shortages Section -->
     <div class="mb-5">
         <h3 class="text-danger">
@@ -56,7 +92,9 @@
                 </table>
             </div>
         {% else %}
-            <p class="text-success">🎉 No shortages found! All items meet expected quantities.</p>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> No shortages found! All items meet expected quantities.
+            </div>
         {% endif %}
     </div>
 
@@ -64,7 +102,7 @@
     {% if previous_session %}
     <div class="mb-5">
         <h3 class="text-primary">
-            <i class="fas fa-plus-circle"></i> New Items ({{ new_items|length }})
+            <i class="fas fa-plus-circle"></i> New Items Since {{ previous_session.name }} ({{ new_items|length }})
         </h3>
         {% if new_items %}
             <div class="table-responsive">
@@ -76,6 +114,7 @@
                             <th>Location</th>
                             <th>Count</th>
                             <th>Condition</th>
+                            <th>Added Date</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -86,59 +125,67 @@
                                 <td>{{ new_item.item.location|default:"-" }}</td>
                                 <td>{{ new_item.count }}</td>
                                 <td>{{ new_item.item.condition|default:"-" }}</td>
+                                <td>{{ new_item.item.created_at|date:"M d, Y" }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <p class="text-muted">No new items since the last inventory session.</p>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No new items since the last inventory session.
+            </div>
         {% endif %}
     </div>
     {% endif %}
 
+    <!-- Summary Statistics -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Inventory Health</h5>
+                </div>
+                <div class="card-body">
+                    {% if shortages %}
+                        <div class="alert alert-warning">
+                            <strong>Action Required:</strong> {{ shortages|length }} item(s) below expected quantity.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-success">
+                            <strong>Good:</strong> All items at or above expected quantities.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Session Progress</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ current_session.get_completion_percentage }}%">
+                            {{ current_session.get_completion_percentage }}%
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {{ current_session.counts.count }} of {{ total_items }} items counted
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% else %}
     <div class="alert alert-warning">
-        <h5>No completed inventory sessions found</h5>
+        <h5><i class="fas fa-exclamation-triangle"></i> No completed inventory sessions found</h5>
         <p>Complete at least one inventory session to generate reports.</p>
-        <a href="{% url 'inventory:create_session' %}" class="btn btn-primary">Start New Session</a>
+        <a href="{% url 'inventory:create_session' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Start New Session
+        </a>
     </div>
 {% endif %}
-{% endblock %}
-
-<!-- inventory/templates/inventory/import_excel.html -->
-{% extends 'inventory/base.html' %}
-
-{% block title %}Import Excel - AVault{% endblock %}
-
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <h2>Import Inventory from Excel</h2>
-        
-        <div class="alert alert-warning">
-            <h6>Before importing:</h6>
-            <ul class="mb-0">
-                <li>Make sure your Excel file follows the same structure as your original inventory</li>
-                <li>Categories should be in rows with no count data</li>
-                <li>Items should have count data in semester columns</li>
-                <li>This will create new categories and items, or update existing ones</li>
-            </ul>
-        </div>
-        
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="excel_file" class="form-label">Excel File *</label>
-                <input type="file" name="excel_file" class="form-control" accept=".xlsx,.xls" required>
-                <div class="form-text">Upload your inventory Excel file (.xlsx or .xls format)</div>
-            </div>
-            
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Import Data</button>
-                <a href="{% url 'inventory:dashboard' %}" class="btn btn-secondary">Cancel</a>
-            </div>
-        </form>
-    </div>
-</div>
 {% endblock %}
