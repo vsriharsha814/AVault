@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Forbidden - AVault</title>
+    <title>Bad Request - AVault</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,7 +12,7 @@
     
     <style>
         body {
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -27,11 +27,11 @@
         }
         .error-icon {
             font-size: 6rem;
-            background: linear-gradient(45deg, #f39c12, #e67e22);
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: bounce 2s infinite;
+            animation: wobble 2s infinite;
         }
         .error-title {
             font-size: 3rem;
@@ -40,7 +40,7 @@
             margin-bottom: 1rem;
         }
         .btn-home {
-            background: linear-gradient(45deg, #f39c12, #e67e22);
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
             border: none;
             padding: 12px 30px;
             font-size: 1.1rem;
@@ -58,8 +58,8 @@
         }
         .btn-back {
             background: transparent;
-            border: 2px solid #f39c12;
-            color: #f39c12;
+            border: 2px solid #ff6b6b;
+            color: #ff6b6b;
             padding: 10px 25px;
             border-radius: 50px;
             text-decoration: none;
@@ -69,12 +69,13 @@
             margin-right: 15px;
         }
         .btn-back:hover {
-            background: #f39c12;
+            background: #ff6b6b;
             color: white;
         }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        @keyframes wobble {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-3deg); }
+            75% { transform: rotate(3deg); }
         }
     </style>
 </head>
@@ -84,13 +85,13 @@
             <div class="col-lg-8 col-xl-6">
                 <div class="error-container text-center">
                     <div class="error-icon mb-4">
-                        <i class="fas fa-lock"></i>
+                        <i class="fas fa-exclamation-circle"></i>
                     </div>
                     
-                    <h1 class="error-title">403</h1>
-                    <h2 class="h4 mb-3">Access Forbidden</h2>
+                    <h1 class="error-title">400</h1>
+                    <h2 class="h4 mb-3">Bad Request</h2>
                     <p class="text-muted mb-4">
-                        You don't have permission to access this page.
+                        Your request couldn't be processed. Please check and try again.
                     </p>
                     
                     <div class="mb-4">
@@ -98,27 +99,11 @@
                             <i class="fas fa-arrow-left"></i>
                             Go Back
                         </a>
-                        <a href="{% url 'home' %}" class="btn-home">
+                        <a href="/" class="btn-home">
                             <i class="fas fa-home"></i>
                             Go to Dashboard
                         </a>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>>
-                            Go to Dashboard
-                        </a>
-                    </div>
-                    
-                    {% if not user.is_authenticated %}
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        You may need to <a href="{% url 'login' %}">login</a> to access this page.
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>

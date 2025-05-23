@@ -98,27 +98,16 @@
                             <i class="fas fa-arrow-left"></i>
                             Go Back
                         </a>
-                        <a href="{% url 'home' %}" class="btn-home">
+                        <a href="/" class="btn-home">
                             <i class="fas fa-home"></i>
                             Go to Dashboard
                         </a>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>>
-                            Go to Dashboard
-                        </a>
-                    </div>
                     
-                    {% if not user.is_authenticated %}
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i>
-                        You may need to <a href="{% url 'login' %}">login</a> to access this page.
+                        You may need to <a href="/login/">login</a> to access this page.
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
