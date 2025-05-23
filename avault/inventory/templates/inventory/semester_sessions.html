@@ -1,0 +1,105 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Inventory Sessions by Semester - AVault{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Inventory Sessions by Semester</h2>
+    <div>
+        <a href="{% url 'inventory:create_session' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> New Session
+        </a>
+        <a href="{% url 'inventory:quick_start_session' %}" class="btn btn-success">
+            <i class="fas fa-play"></i> Quick Start
+        </a>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <strong>Current Academic Term:</strong> {{ current_term.name }}
+    <span class="badge bg-primary ms-2">{{ current_term.get_term_display }} {{ current_term.year }}</span>
+</div>
+
+{% if sessions_by_term %}
+    {% for term_name, term_data in sessions_by_term.items %}
+        <div class="card mb-4">
+            <div class="card-header {% if term_data.term and term_data.term.name == current_term.name %}bg-primary text-white{% endif %}">
+                <h5 class="mb-0">
+                    {% if term_data.term %}
+                        <i class="fas fa-calendar-alt"></i> {{ term_data.term.name }}
+                        <small class="ms-2">({{ term_data.term.get_term_display }} {{ term_data.term.year }})</small>
+                        {% if term_data.term.name == current_term.name %}
+                            <span class="badge bg-light text-dark ms-2">Current</span>
+                        {% endif %}
+                    {% else %}
+                        <i class="fas fa-question-circle"></i> {{ term_name }}
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Session Name</th>
+                                <th>Date</th>
+                                <th>Conducted By</th>
+                                <th>Status</th>
+                                <th>Completion</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for session in term_data.sessions %}
+                                <tr>
+                                    <td><strong>{{ session.name }}</strong></td>
+                                    <td>{{ session.date }}</td>
+                                    <td>{{ session.conducted_by.username|default:"-" }}</td>
+                                    <td>
+                                        {% if session.is_complete %}
+                                            <span class="badge bg-success">Complete</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">In Progress</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="width: 100px;">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ session.get_completion_percentage }}%"
+                                                 aria-valuenow="{{ session.get_completion_percentage }}" 
+                                                 aria-valuemin="0" aria-valuemax="100">
+                                                {{ session.get_completion_percentage }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'inventory:conduct_inventory' session.id %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            {% if session.is_complete %}
+                                                <i class="fas fa-eye"></i> View
+                                            {% else %}
+                                                <i class="fas fa-edit"></i> Continue
+                                            {% endif %}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+        <h4>No Inventory Sessions</h4>
+        <p class="text-muted">
+            Create your first inventory session to start tracking your equipment.
+        </p>
+        <a href="{% url 'inventory:create_session' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create First Session
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

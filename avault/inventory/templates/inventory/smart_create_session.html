@@ -1,0 +1,70 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}New Inventory Session - AVault{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2>Create New Inventory Session</h2>
+        
+        <div class="alert alert-info">
+            <h6><i class="fas fa-info-circle"></i> Smart Session Creation</h6>
+            <p class="mb-0">The system will automatically link your session to the appropriate academic term based on the session name or current date.</p>
+        </div>
+        
+        <div class="alert alert-success">
+            <strong>Current Academic Term:</strong> {{ current_term.name }} ({{ current_term.get_term_display }} {{ current_term.year }})
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Session Name *</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="text-danger">{{ form.name.errors }}</div>
+                {% endif %}
+                <div class="form-text">
+                    <strong>Suggestions:</strong>
+                    <div class="btn-group btn-group-sm mt-1" role="group">
+                        {% for suggestion in suggested_sessions %}
+                            <button type="button" class="btn btn-outline-secondary" onclick="setSuggestion('{{ suggestion }}')">
+                                {{ suggestion }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.date.id_for_label }}" class="form-label">Date *</label>
+                {{ form.date }}
+                {% if form.date.errors %}
+                    <div class="text-danger">{{ form.date.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                {{ form.notes }}
+                <div class="form-text">Any additional information about this inventory session</div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create Session
+                </button>
+                <a href="{% url 'inventory:inventory_sessions' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function setSuggestion(suggestion) {
+    document.getElementById('{{ form.name.id_for_label }}').value = suggestion;
+}
+</script>
+{% endblock %}

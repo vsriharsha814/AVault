@@ -11,6 +11,261 @@ import json
 from .models import Category, Item, AcademicTerm, HistoricalCount, InventorySession, InventoryCount
 from .forms import ItemForm, InventorySessionForm
 from .utils import import_excel_data, get_trend_analysis, generate_semester_comparison_report
+from datetime import datetime
+import re
+
+def get_current_academic_term():
+    """
+    Automatically determine current academic term based on current date
+    """
+    now = timezone.now()
+    month = now.month
+    year = now.year
+    
+    # Determine semester based on month
+    if month >= 1 and month <= 5:  # January to May
+        term = 'SPRING'
+    elif month >= 6 and month <= 8:  # June to August  
+        term = 'SUMMER'
+    elif month >= 9 and month <= 12:  # September to December
+        term = 'FALL'
+    
+    # Create term name
+    term_name = f"{term} {year}"
+    
+    # Get or create the academic term
+    academic_term, created = AcademicTerm.objects.get_or_create(
+        name=term_name,
+        defaults={
+            'term': term,
+            'year': year
+        }
+    )
+    
+    return academic_term
+
+def get_or_create_semester_session(academic_term):
+    """
+    Get existing session for academic term or create a new one
+    """
+    # Check if there's already a session for this term
+    existing_session = InventorySession.objects.filter(
+        academic_term=academic_term,
+        name__icontains=academic_term.name
+    ).first()
+    
+    if existing_session:
+        return existing_session, False
+    
+    # Create new session for this semester
+    session_name = f"{academic_term.name} Inventory"
+    session = InventorySession.objects.create(
+        name=session_name,
+        academic_term=academic_term,
+        date=timezone.now().date(),
+        notes=f"Automatic session for {academic_term.name}"
+    )
+    
+    return session, True
+
+@login_required
+def enhanced_dashboard(request):
+    """Enhanced dashboard with automatic session management"""
+    # Get or create current academic term
+    current_term = get_current_academic_term()
+    
+    # Get or create session for current semester
+    current_session, session_created = get_or_create_semester_session(current_term)
+    
+    if session_created:
+        messages.info(request, f'Created new inventory session for {current_term.name}')
+    
+    # Get search and filter parameters
+    search = request.GET.get('search', '')
+    category_filter = request.GET.get('category', '')
+    
+    # Base queryset
+    items = Item.objects.select_related('category').all()
+    
+    # Apply filters
+    if search:
+        items = items.filter(
+            Q(name__icontains=search) |
+            Q(location__icontains=search) |
+            Q(serial_frequency__icontains=search)
+        )
+    
+    if category_filter:
+        items = items.filter(category_id=category_filter)
+    
+    # Group items by category
+    items_by_category = {}
+    for item in items:
+        cat_name = item.category.name
+        if cat_name not in items_by_category:
+            items_by_category[cat_name] = []
+        items_by_category[cat_name].append(item)
+    
+    context = {
+        'items_by_category': items_by_category,
+        'categories': Category.objects.all(),
+        'search': search,
+        'category_filter': category_filter,
+        'total_items': Item.objects.count(),
+        'total_categories': Category.objects.count(),
+        'latest_session': InventorySession.objects.first(),
+        'current_term': current_term,
+        'current_session': current_session,
+        'session_created': session_created,
+    }
+    
+    return render(request, 'inventory/enhanced_dashboard.html', context)
+
+@login_required
+def smart_create_session(request):
+    """Smart session creation that links to academic terms"""
+    current_term = get_current_academic_term()
+    
+    if request.method == 'POST':
+        form = InventorySessionForm(request.POST)
+        if form.is_valid():
+            session = form.save(commit=False)
+            session.conducted_by = request.user
+            
+            # Try to parse academic term from session name
+            session_name = session.name.upper()
+            parsed_term = None
+            
+            # Check if session name contains semester info
+            for term_choice in ['SPRING', 'SUMMER', 'FALL', 'WINTER']:
+                if term_choice in session_name:
+                    # Extract year from session name
+                    year_match = re.search(r'\b(20\d{2})\b', session_name)
+                    if year_match:
+                        year = int(year_match.group(1))
+                        term_name = f"{term_choice} {year}"
+                        
+                        parsed_term, created = AcademicTerm.objects.get_or_create(
+                            name=term_name,
+                            defaults={
+                                'term': term_choice,
+                                'year': year
+                            }
+                        )
+                        break
+            
+            # If no term parsed from name, use current term
+            if not parsed_term:
+                parsed_term = current_term
+            
+            session.academic_term = parsed_term
+            session.save()
+            
+            messages.success(request, f'Session "{session.name}" created for {parsed_term.name}!')
+            return redirect('inventory:conduct_inventory', session_id=session.id)
+    else:
+        # Pre-populate form with current semester
+        initial_data = {
+            'name': f'{current_term.name} Count',
+            'date': timezone.now().date()
+        }
+        form = InventorySessionForm(initial=initial_data)
+    
+    context = {
+        'form': form,
+        'current_term': current_term,
+        'suggested_sessions': [
+            f'{current_term.name} Count',
+            f'{current_term.name} Mid-Semester Check',
+            f'{current_term.name} Final Inventory'
+        ]
+    }
+    
+    return render(request, 'inventory/smart_create_session.html', context)
+
+@login_required
+def semester_sessions_view(request):
+    """View sessions organized by academic terms"""
+    # Group sessions by academic term
+    sessions_by_term = {}
+    
+    # Get all sessions with academic terms
+    sessions = InventorySession.objects.select_related('academic_term', 'conducted_by').all()
+    
+    for session in sessions:
+        if session.academic_term:
+            term_name = session.academic_term.name
+            if term_name not in sessions_by_term:
+                sessions_by_term[term_name] = {
+                    'term': session.academic_term,
+                    'sessions': []
+                }
+            sessions_by_term[term_name]['sessions'].append(session)
+        else:
+            # Handle sessions without academic terms
+            if 'Unassigned' not in sessions_by_term:
+                sessions_by_term['Unassigned'] = {
+                    'term': None,
+                    'sessions': []
+                }
+            sessions_by_term['Unassigned']['sessions'].append(session)
+    
+    context = {
+        'sessions_by_term': sessions_by_term,
+        'current_term': get_current_academic_term()
+    }
+    
+    return render(request, 'inventory/semester_sessions.html', context)
+
+# Enhanced import function
+def enhanced_import_excel_with_auto_sessions(excel_file):
+    """
+    Enhanced import that automatically creates sessions for each semester
+    """
+    # Use existing import function
+    result = import_excel_data(excel_file)
+    
+    # Create sessions for each imported academic term
+    sessions_created = []
+    
+    for term_name in result.get('academic_terms', []):
+        try:
+            academic_term = AcademicTerm.objects.get(name=term_name)
+            
+            # Check if session already exists for this term
+            existing_session = InventorySession.objects.filter(
+                academic_term=academic_term
+            ).first()
+            
+            if not existing_session:
+                # Create session for this term
+                session = InventorySession.objects.create(
+                    name=f"{term_name} Import Session",
+                    academic_term=academic_term,
+                    date=timezone.now().date(),
+                    is_complete=True,  # Mark as complete since data is imported
+                    notes=f"Auto-created from Excel import with historical data"
+                )
+                
+                # Create inventory counts for this session based on historical data
+                historical_counts = HistoricalCount.objects.filter(academic_term=academic_term)
+                for hist_count in historical_counts:
+                    InventoryCount.objects.get_or_create(
+                        item=hist_count.item,
+                        session=session,
+                        defaults={
+                            'counted_quantity': hist_count.counted_quantity,
+                            'notes': f'Imported from {term_name} historical data'
+                        }
+                    )
+                
+                sessions_created.append(session.name)
+                
+        except AcademicTerm.DoesNotExist:
+            continue
+    
+    result['sessions_created'] = sessions_created
+    return result
 
 @login_required
 def dashboard(request):
@@ -361,6 +616,19 @@ def semester_comparison(request):
         })
     
     return render(request, 'inventory/semester_comparison.html', context)
+
+@login_required
+def quick_start_current_session(request):
+    """Quick start a session for current semester"""
+    current_term = get_current_academic_term()
+    session, created = get_or_create_semester_session(current_term)
+    
+    if created:
+        messages.success(request, f'Started new inventory session for {current_term.name}!')
+    else:
+        messages.info(request, f'Continuing existing session for {current_term.name}')
+    
+    return redirect('inventory:conduct_inventory', session_id=session.id)
 
 @login_required
 def item_trend_analysis(request, item_id):

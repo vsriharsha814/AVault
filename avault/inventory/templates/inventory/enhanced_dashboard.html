@@ -1,0 +1,175 @@
+{% extends 'inventory/base.html' %}
+{% load inventory_extras %}
+
+{% block title %}Dashboard - AVault{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Inventory Dashboard</h1>
+    <div class="btn-group">
+        <a href="{% url 'inventory:add_item' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Item
+        </a>
+        <a href="{% url 'inventory:quick_start_session' %}" class="btn btn-success">
+            <i class="fas fa-play"></i> Start Current Session
+        </a>
+    </div>
+</div>
+
+<!-- Current Semester Alert -->
+<div class="alert alert-info">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h6><i class="fas fa-calendar-alt"></i> Current Academic Term: <strong>{{ current_term.name }}</strong></h6>
+            {% if current_session %}
+                <p class="mb-0">
+                    <i class="fas fa-clipboard-list"></i> Active Session: 
+                    <strong>{{ current_session.name }}</strong>
+                    {% if current_session.is_complete %}
+                        <span class="badge bg-success">Complete</span>
+                    {% else %}
+                        <span class="badge bg-warning">{{ current_session.get_completion_percentage }}% Complete</span>
+                    {% endif %}
+                </p>
+            {% else %}
+                <p class="mb-0 text-muted">No active session for this semester</p>
+            {% endif %}
+        </div>
+        <div class="col-md-4 text-end">
+            {% if current_session and not current_session.is_complete %}
+                <a href="{% url 'inventory:conduct_inventory' current_session.id %}" class="btn btn-sm btn-warning">
+                    <i class="fas fa-edit"></i> Continue Counting
+                </a>
+            {% endif %}
+            <a href="{% url 'inventory:create_session' %}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-plus"></i> New Session
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Items</h5>
+                <h2 class="text-primary">{{ total_items }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Categories</h5>
+                <h2 class="text-info">{{ total_categories }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Current Term</h5>
+                <h6 class="text-muted">{{ current_term.get_term_display }} {{ current_term.year }}</h6>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Quick Actions</h5>
+                <div class="btn-group-vertical" role="group">
+                    <a href="{% url 'inventory:quick_start_session' %}" class="btn btn-sm btn-outline-success">Start Session</a>
+                    <a href="{% url 'inventory:reports' %}" class="btn btn-sm btn-outline-info">View Reports</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <label for="search" class="form-label">Search Items</label>
+                <input type="text" name="search" class="form-control" value="{{ search }}" 
+                       placeholder="Search by name, location, or serial...">
+            </div>
+            <div class="col-md-4">
+                <label for="category" class="form-label">Filter by Category</label>
+                <select name="category" class="form-control">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category.id|stringformat:"s" == category_filter %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Filter</button>
+                <a href="{% url 'inventory:dashboard' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Inventory Items (same as original) -->
+{% if items_by_category %}
+    {% for category_name, items in items_by_category.items %}
+        <div class="mb-4">
+            <h3 class="category-header p-3 rounded">{{ category_name }}</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Location</th>
+                            <th>Condition</th>
+                            <th>Serial/Frequency</th>
+                            <th>Latest Count</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                            <tr>
+                                <td><strong>{{ item.name }}</strong></td>
+                                <td>{{ item.location|default:"-" }}</td>
+                                <td>{{ item.condition|default:"-" }}</td>
+                                <td>{{ item.serial_frequency|default:"-" }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ item.get_latest_count }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'inventory:edit_item' item.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'inventory:item_trend_analysis' item.id %}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-chart-line"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+        <h4>No Items Found</h4>
+        <p class="text-muted">
+            {% if search or category_filter %}
+                No items match your search criteria. <a href="{% url 'inventory:dashboard' %}">Clear filters</a>
+            {% else %}
+                Start by <a href="{% url 'inventory:add_item' %}">adding your first item</a> or 
+                <a href="{% url 'inventory:import_excel' %}">importing from Excel</a>.
+            {% endif %}
+        </p>
+    </div>
+{% endif %}
+{% endblock %}
