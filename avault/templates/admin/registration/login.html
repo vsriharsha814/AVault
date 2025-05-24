@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVault Admin Login</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem 0;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .login-left {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .brand-section {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .brand-logo {
+            font-size: 4rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        .brand-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #fff, #e0e0e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .brand-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+        
+        .feature-item i {
+            color: var(--accent-color);
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .login-right {
+            padding: 3rem;
+            background: white;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-subtitle {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        .login-form {
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            background-color: white;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            z-index: 2;
+        }
+        
+        .input-group .form-control {
+            padding-left: 3rem;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--accent-color), #2980b9);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-login:hover::before {
+            left: 100%;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        
+        .error-messages {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .error-messages ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        
+        .demo-credentials {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .demo-credentials h6 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .credential-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            margin: 0.25rem;
+            display: inline-block;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .footer-links a {
+            color: var(--accent-color);
+            text-decoration: none;
+            margin: 0 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .login-container {
+                margin: 1rem;
+                border-radius: 15px;
+            }
+            
+            .login-left {
+                padding: 2rem;
+                text-align: center;
+            }
+            
+            .brand-logo {
+                font-size: 3rem;
+            }
+            
+            .brand-title {
+                font-size: 2rem;
+            }
+            
+            .feature-list {
+                display: none;
+            }
+            
+            .login-right {
+                padding: 2rem;
+            }
+            
+            .login-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Loading animation */
+        .btn-login.loading {
+            pointer-events: none;
+        }
+        
+        .btn-login.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="login-container row g-0">
+                    <!-- Left Panel -->
+                    <div class="col-lg-6 login-left">
+                        <div class="brand-section">
+                            <div class="brand-logo">
+                                <i class="fas fa-microphone"></i>
+                            </div>
+                            <h1 class="brand-title">AVault</h1>
+                            <p class="brand-subtitle">AV Inventory Management System</p>
+                            
+                            <ul class="feature-list">
+                                <li class="feature-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>Complete inventory tracking</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>Semester-based reporting</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>Advanced analytics & trends</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>Multi-user collaboration</span>
+                                </li>
+                                <li class="feature-item">
+                                    <i class="fas fa-check"></i>
+                                    <span>Excel import/export</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Panel -->
+                    <div class="col-lg-6 login-right">
+                        <div class="login-header">
+                            <h2 class="login-title">Admin Login</h2>
+                            <p class="login-subtitle">Sign in to access the admin panel</p>
+                        </div>
+                        
+                        {% if form.errors %}
+                        <div class="error-messages">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Login Failed</strong>
+                            {% if form.non_field_errors %}
+                                {{ form.non_field_errors }}
+                            {% else %}
+                                <p>Please check your username and password and try again.</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <form method="post" class="login-form" id="loginForm">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <label for="{{ form.username.id_for_label }}" class="form-label">
+                                    <i class="fas fa-user"></i> Username
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-user input-icon"></i>
+                                    {{ form.username }}
+                                </div>
+                                {% if form.username.errors %}
+                                <small class="text-danger">{{ form.username.errors }}</small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.password.id_for_label }}" class="form-label">
+                                    <i class="fas fa-lock"></i> Password
+                                </label>
+                                <div class="input-group">
+                                    <i class="fas fa-lock input-icon"></i>
+                                    {{ form.password }}
+                                </div>
+                                {% if form.password.errors %}
+                                <small class="text-danger">{{ form.password.errors }}</small>
+                                {% endif %}
+                            </div>
+                            
+                            <button type="submit" class="btn-login" id="loginButton">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Sign In to Admin Panel
+                            </button>
+                        </form>
+                        
+                        <!-- Demo Credentials -->
+                        <div class="demo-credentials">
+                            <h6><i class="fas fa-info-circle"></i> Demo Credentials</h6>
+                            <div>
+                                <div class="credential-item">admin / admin123</div>
+                                <div class="credential-item">avuser / avpass123</div>
+                            </div>
+                        </div>
+                        
+                        <div class="footer-links">
+                            <a href="{% url 'inventory:dashboard' %}">
+                                <i class="fas fa-home"></i>
+                                Back to Main Site
+                            </a>
+                            <a href="#" onclick="showHelp()">
+                                <i class="fas fa-question-circle"></i>
+                                Need Help?
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Help Modal -->
+    <div class="modal fade" id="helpModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-question-circle"></i>
+                        Admin Login Help
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-user-shield"></i> Admin Access</h6>
+                            <p>Admin users have full access to:</p>
+                            <ul>
+                                <li>User management</li>
+                                <li>System settings</li>
+                                <li>Data import/export</li>
+                                <li>All inventory functions</li>
+                            </ul>
+                            <p><strong>Default admin:</strong> <code>admin / admin123</code></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-user"></i> Regular User Access</h6>
+                            <p>Standard users can:</p>
+                            <ul>
+                                <li>View inventory data</li>
+                                <li>Conduct inventory sessions</li>
+                                <li>Generate reports</li>
+                                <li>Add/edit items</li>
+                            </ul>
+                            <p><strong>Demo user:</strong> <code>avuser / avpass123</code></p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb"></i> Quick Tips</h6>
+                        <ul class="mb-0">
+                            <li>Use the admin panel for system management and configuration</li>
+                            <li>Access the main AVault application through the "Back to Main Site" link</li>
+                            <li>Admin users can create new users and manage permissions</li>
+                            <li>All actions in the admin panel are logged for security</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginButton = document.getElementById('loginButton');
+            const usernameField = document.querySelector('input[name="username"]');
+            const passwordField = document.querySelector('input[name="password"]');
+            
+            // Add form control classes to Django form fields
+            usernameField.classList.add('form-control');
+            passwordField.classList.add('form-control');
+            
+            // Set input attributes
+            usernameField.setAttribute('placeholder', 'Enter your username');
+            passwordField.setAttribute('placeholder', 'Enter your password');
+            
+            // Form submission handling
+            loginForm.addEventListener('submit', function(e) {
+                // Add loading state
+                loginButton.classList.add('loading');
+                loginButton.disabled = true;
+                loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+                
+                // Basic validation
+                if (!usernameField.value.trim() || !passwordField.value.trim()) {
+                    e.preventDefault();
+                    showError('Please enter both username and password');
+                    resetButton();
+                    return false;
+                }
+            });
+            
+            // Reset button state if form submission fails
+            function resetButton() {
+                setTimeout(function() {
+                    loginButton.classList.remove('loading');
+                    loginButton.disabled = false;
+                    loginButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In to Admin Panel';
+                }, 2000);
+            }
+            
+            // Enhanced form validation
+            usernameField.addEventListener('input', validateForm);
+            passwordField.addEventListener('input', validateForm);
+            
+            function validateForm() {
+                const username = usernameField.value.trim();
+                const password = passwordField.value.trim();
+                
+                if (username && password) {
+                    loginButton.style.opacity = '1';
+                    loginButton.style.pointerEvents = 'auto';
+                } else {
+                    loginButton.style.opacity = '0.7';
+                    loginButton.style.pointerEvents = 'none';
+                }
+            }
+            
+            // Initial validation
+            validateForm();
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Alt + L to focus on login form
+                if (e.altKey && e.key === 'l') {
+                    e.preventDefault();
+                    usernameField.focus();
+                }
+            });
+            
+            // Demo credential quick fill
+            document.querySelectorAll('.credential-item').forEach(function(item) {
+                item.addEventListener('click', function() {
+                    const credentials = this.textContent.split(' / ');
+                    if (credentials.length === 2) {
+                        usernameField.value = credentials[0];
+                        passwordField.value = credentials[1];
+                        validateForm();
+                        
+                        // Visual feedback
+                        this.style.background = 'rgba(39, 174, 96, 0.2)';
+                        setTimeout(() => {
+                            this.style.background = 'rgba(255, 255, 255, 0.8)';
+                        }, 300);
+                    }
+                });
+                
+                // Add cursor pointer
+                item.style.cursor = 'pointer';
+                item.title = 'Click to auto-fill credentials';
+            });
+            
+            // Error handling
+            function showError(message) {
+                const existingError = document.querySelector('.error-messages');
+                if (existingError) {
+                    existingError.remove();
+                }
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-messages';
+                errorDiv.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Error:</strong> ${message}
+                `;
+                
+                loginForm.insertBefore(errorDiv, loginForm.firstChild);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    errorDiv.remove();
+                }, 5000);
+            }
+            
+            // Focus management
+            usernameField.focus();
+            
+            // Auto-hide demo credentials after successful interaction
+            let interactionCount = 0;
+            [usernameField, passwordField].forEach(field => {
+                field.addEventListener('focus', () => {
+                    interactionCount++;
+                    if (interactionCount > 3) {
+                        const demoSection = document.querySelector('.demo-credentials');
+                        if (demoSection) {
+                            demoSection.style.opacity = '0.5';
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Help modal function
+        function showHelp() {
+            const helpModal = new bootstrap.Modal(document.getElementById('helpModal'));
+            helpModal.show();
+        }
+        
+        // Security features
+        (function() {
+            // Disable right-click context menu on sensitive areas
+            document.querySelectorAll('.credential-item').forEach(function(item) {
+                item.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                });
+            });
+            
+            // Clear sensitive data on page unload
+            window.addEventListener('beforeunload', function() {
+                const passwordField = document.querySelector('input[name="password"]');
+                if (passwordField) {
+                    passwordField.value = '';
+                }
+            });
+            
+            // Detect if running in development mode
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                // Add development indicator
+                const devIndicator = document.createElement('div');
+                devIndicator.innerHTML = `
+                    <div style="position: fixed; top: 10px; right: 10px; background: #f39c12; color: white; 
+                                padding: 5px 10px; border-radius: 15px; font-size: 12px; z-index: 9999;">
+                        <i class="fas fa-code"></i> DEV MODE
+                    </div>
+                `;
+                document.body.appendChild(devIndicator);
+            }
+        })();
+    </script>
+</body>
+</html>

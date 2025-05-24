@@ -50,6 +50,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'inventory.context_processors.admin_stats',
             ],
         },
     },
@@ -98,6 +99,10 @@ LOGGING = {
         },
     },
 }
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 
 LOGS_DIR = BASE_DIR / 'logs'
 if not os.path.exists(LOGS_DIR):
