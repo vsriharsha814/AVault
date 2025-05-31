@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.contrib.admin import AdminSite
 from django.urls import reverse
 from django.utils.html import format_html
@@ -34,7 +35,7 @@ class AVaultAdminSite(AdminSite):
 # Enhanced Model Admins
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'created_at', 'item_count', 'actions']
+    list_display = ['name', 'created_at', 'item_count', 'admin_actions']
     search_fields = ['name']
     ordering = ['name']
     list_per_page = 25
@@ -45,16 +46,16 @@ class CategoryAdmin(admin.ModelAdmin):
         return format_html('<a href="{}">{} items</a>', url, count)
     item_count.short_description = 'Items'
     
-    def actions(self, obj):
+    def admin_actions(self, obj):
         return format_html(
             '<a class="btn btn-sm btn-outline-primary" href="{}">Edit</a>',
             reverse('admin:inventory_category_change', args=[obj.pk])
         )
-    actions.short_description = 'Actions'
+    admin_actions.short_description = 'Actions'
 
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'location', 'condition', 'latest_count', 'created_at', 'actions']
+    list_display = ['name', 'category', 'location', 'condition', 'latest_count', 'created_at', 'admin_actions']
     list_filter = ['category', 'condition', 'location', 'created_at']
     search_fields = ['name', 'location', 'serial_frequency']
     ordering = ['category__name', 'name']
@@ -76,12 +77,12 @@ class ItemAdmin(admin.ModelAdmin):
         return format_html('<span class="badge bg-primary">{}</span>', count)
     latest_count.short_description = 'Latest Count'
     
-    def actions(self, obj):
+    def admin_actions(self, obj):
         return format_html(
             '<a class="btn btn-sm btn-outline-primary" href="{}">Edit</a>',
             reverse('admin:inventory_item_change', args=[obj.pk])
         )
-    actions.short_description = 'Actions'
+    admin_actions.short_description = 'Actions'
 
 @admin.register(InventorySession)  
 class InventorySessionAdmin(admin.ModelAdmin):
@@ -95,28 +96,6 @@ class InventorySessionAdmin(admin.ModelAdmin):
         color = 'success' if percentage == 100 else 'warning'
         return format_html('<span class="badge bg-{}">{}</span>', color, f'{percentage}%')
     completion_percentage.short_description = 'Completion'
-
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'created_at', 'item_count']
-    search_fields = ['name']
-    ordering = ['name']
-    
-    def item_count(self, obj):
-        return obj.items.count()
-    item_count.short_description = 'Items'
-
-@admin.register(Item)
-class ItemAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'location', 'condition', 'latest_count', 'created_at']
-    list_filter = ['category', 'condition', 'location', 'created_at']
-    search_fields = ['name', 'location', 'serial_frequency']
-    ordering = ['category__name', 'name']
-    list_select_related = ['category']
-    
-    def latest_count(self, obj):
-        return obj.get_latest_count()
-    latest_count.short_description = 'Latest Count'
 
 @admin.register(AcademicTerm)
 class AcademicTermAdmin(admin.ModelAdmin):
@@ -132,17 +111,6 @@ class HistoricalCountAdmin(admin.ModelAdmin):
     search_fields = ['item__name', 'academic_term__name']
     ordering = ['-academic_term__year', '-academic_term__term', 'item__name']
     list_select_related = ['item', 'academic_term']
-
-@admin.register(InventorySession)
-class InventorySessionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'date', 'conducted_by', 'academic_term', 'is_complete', 'completion_percentage', 'created_at']
-    list_filter = ['is_complete', 'date', 'conducted_by', 'academic_term']
-    search_fields = ['name']
-    ordering = ['-date']
-    
-    def completion_percentage(self, obj):
-        return f"{obj.get_completion_percentage()}%"
-    completion_percentage.short_description = 'Completion'
 
 @admin.register(InventoryCount)
 class InventoryCountAdmin(admin.ModelAdmin):
