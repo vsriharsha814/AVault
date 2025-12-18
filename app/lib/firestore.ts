@@ -117,6 +117,40 @@ export async function createAcademicTerm(
   return docRef.id;
 }
 
+export async function findOrCreateAcademicTermByCode(
+  term: AcademicTerm['term'],
+  year: number,
+  name?: string
+): Promise<AcademicTerm> {
+  // Look for an existing term with the same term code and year
+  const snapshot = await getDocs(
+    query(
+      getAcademicTermsCollection(),
+      where('term', '==', term),
+      where('year', '==', year)
+    )
+  );
+
+  if (!snapshot.empty) {
+    const docSnap = snapshot.docs[0];
+    return {
+      id: docSnap.id,
+      ...docSnap.data(),
+      createdAt: (docSnap.data() as any).createdAt || Timestamp.now(),
+    } as AcademicTerm;
+  }
+
+  const termName = name ?? `${term} ${year}`;
+  const id = await createAcademicTerm(termName, term, year);
+  return {
+    id,
+    name: termName,
+    term,
+    year,
+    createdAt: Timestamp.now(),
+  };
+}
+
 // Items
 export const getItemsCollection = () => collection(requireDb(), 'items');
 

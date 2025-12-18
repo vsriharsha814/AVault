@@ -11,6 +11,7 @@ import {
   getInventoryCounts,
   createOrUpdateInventoryCount,
   updateInventorySession,
+  findOrCreateAcademicTermByCode,
   syncHistoricalCountsFromSession,
 } from '../../../lib/firestore';
 import type { InventorySession, Item, Category, InventoryCount } from '../../../types';
@@ -113,13 +114,27 @@ function CountSessionPageContent() {
     }
 
     try {
+      let academicTermId = session.academicTermId;
+
+      // If this session isn't yet linked to an academic term, create/find it now
+      // using the term snapshot that was stored when the session was created.
+      if (!academicTermId && session.term && session.termYear) {
+        const termDoc = await findOrCreateAcademicTermByCode(
+          session.term,
+          session.termYear,
+          `${session.term} ${session.termYear}`
+        );
+        academicTermId = termDoc.id;
+        await updateInventorySession(sessionId, { academicTermId });
+      }
+
       await updateInventorySession(sessionId, { isComplete: true });
-      setSession({ ...session, isComplete: true });
+      setSession({ ...session, isComplete: true, academicTermId });
 
       // When a session is completed, push its counts into the historical counts
       // for the associated academic term so the dashboard reflects the latest data.
-      if (session.academicTermId) {
-        await syncHistoricalCountsFromSession(sessionId, session.academicTermId);
+      if (academicTermId) {
+        await syncHistoricalCountsFromSession(sessionId, academicTermId);
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to complete session');

@@ -42,6 +42,9 @@ export interface InventorySession {
   id: string;
   name: string;
   academicTermId?: string;
+  // Term snapshot at the time the session was created (used to create the academic term later)
+  term?: TermType;
+  termYear?: number;
   date: Timestamp;
   conductedByUid?: string;
   isComplete: boolean;
