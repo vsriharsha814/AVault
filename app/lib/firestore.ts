@@ -264,17 +264,16 @@ export const getInventoryCountsCollection = () => collection(requireDb(), 'inven
 
 export async function getInventoryCounts(sessionId: string): Promise<InventoryCount[]> {
   const snapshot = await getDocs(
-    query(
-      getInventoryCountsCollection(),
-      where('sessionId', '==', sessionId),
-      orderBy('itemId')
-    )
+    query(getInventoryCountsCollection(), where('sessionId', '==', sessionId))
   );
-  return snapshot.docs.map((doc) => ({
+  const counts = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
     countedAt: doc.data().countedAt || Timestamp.now(),
   })) as InventoryCount[];
+
+  // Sort in memory by itemId so we don't need a composite index in Firestore
+  return counts.sort((a, b) => a.itemId.localeCompare(b.itemId));
 }
 
 export async function createOrUpdateInventoryCount(

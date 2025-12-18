@@ -12,7 +12,7 @@ import AuthGuard from '../../components/AuthGuard';
 
 function NewSessionPageContent() {
   const router = useRouter();
-  const [user] = useAuthState(auth || undefined);
+  const [user] = useAuthState(auth as any);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -44,7 +44,8 @@ function NewSessionPageContent() {
         date: Timestamp.now(),
         conductedByUid: user?.uid,
         isComplete: false,
-        notes: formData.notes.trim() || undefined,
+        // Firestore does not allow undefined; omit notes when empty
+        ...(formData.notes.trim() ? { notes: formData.notes.trim() } : {}),
       });
       
       // Redirect to the counting page
