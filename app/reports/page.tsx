@@ -111,46 +111,82 @@ function ReportsPageContent() {
   });
 
   return (
-    <div className="min-h-screen px-6 py-8 sm:px-8 lg:px-10">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-6">
         <header className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-50">Inventory Reports</h1>
-            <p className="mt-1 text-sm text-slate-400">View inventory trends and analysis</p>
+          <div className="space-y-1">
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-50 via-emerald-100 to-slate-50 bg-clip-text text-transparent flex items-center gap-3">
+              <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Inventory Reports
+            </h1>
+            <p className="text-sm text-slate-400">View inventory trends and analysis</p>
           </div>
           <Link
             href="/"
-            className="rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-800"
+            className="group rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50"
           >
-            Back to Dashboard
+            ← Back to Dashboard
           </Link>
         </header>
 
         {loading ? (
-          <div className="text-center py-12 text-slate-400">Loading reports...</div>
+          <div className="flex items-center justify-center py-20">
+            <div className="flex items-center gap-3 text-slate-400">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-600 border-t-emerald-500"></div>
+              <span className="text-sm">Loading reports...</span>
+            </div>
+          </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Summary Cards */}
             <section className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Total Items</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-50">{items.length}</p>
+              <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-slate-700/50">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="rounded-lg bg-blue-500/10 p-2">
+                    <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Items</p>
+                </div>
+                <p className="text-3xl font-bold text-slate-50">{items.length.toLocaleString()}</p>
               </div>
-              <div className="rounded-xl border border-red-800 bg-red-500/10 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-red-400">Decreasing Items</p>
-                <p className="mt-2 text-2xl font-semibold text-red-400">{itemsWithShortages.length}</p>
+              <div className="group relative overflow-hidden rounded-2xl border border-red-800/50 bg-gradient-to-br from-red-950/50 to-slate-900/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-red-700/50">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="rounded-lg bg-red-500/10 p-2">
+                    <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-red-400">Decreasing Items</p>
+                </div>
+                <p className="text-3xl font-bold text-red-400">{itemsWithShortages.length.toLocaleString()}</p>
               </div>
-              <div className="rounded-xl border border-emerald-800 bg-emerald-500/10 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-emerald-400">Increasing Items</p>
-                <p className="mt-2 text-2xl font-semibold text-emerald-400">{itemsWithIncreases.length}</p>
+              <div className="group relative overflow-hidden rounded-2xl border border-emerald-800/50 bg-gradient-to-br from-emerald-950/50 to-slate-900/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-emerald-700/50">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="rounded-lg bg-emerald-500/10 p-2">
+                    <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Increasing Items</p>
+                </div>
+                <p className="text-3xl font-bold text-emerald-400">{itemsWithIncreases.length.toLocaleString()}</p>
               </div>
             </section>
 
             {/* Items with Decreases */}
             {itemsWithShortages.length > 0 && (
               <section>
-                <h2 className="text-xl font-semibold text-slate-100 mb-4">Items with Decreases</h2>
-                <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
+                <h2 className="text-2xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+                  <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                  </svg>
+                  Items with Decreases
+                </h2>
+                <div className="rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl overflow-hidden shadow-xl shadow-slate-900/50">
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead className="bg-slate-800/50">
@@ -185,8 +221,13 @@ function ReportsPageContent() {
             {/* Items with Increases */}
             {itemsWithIncreases.length > 0 && (
               <section>
-                <h2 className="text-xl font-semibold text-slate-100 mb-4">Items with Increases</h2>
-                <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
+                <h2 className="text-2xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+                  <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                  Items with Increases
+                </h2>
+                <div className="rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl overflow-hidden shadow-xl shadow-slate-900/50">
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead className="bg-slate-800/50">
@@ -221,8 +262,13 @@ function ReportsPageContent() {
             {/* Items with No Recent Activity */}
             {itemsNoRecentActivity.length > 0 && (
               <section>
-                <h2 className="text-xl font-semibold text-slate-100 mb-4">Items with No Recent Activity</h2>
-                <div className="rounded-xl border border-yellow-800 bg-yellow-500/10 p-4">
+                <h2 className="text-2xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+                  <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  Items with No Recent Activity
+                </h2>
+                <div className="rounded-2xl border border-yellow-800/50 bg-gradient-to-br from-yellow-950/50 to-slate-900/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50">
                   <p className="text-sm text-slate-400 mb-3">
                     {itemsNoRecentActivity.length} items have no counts in the latest term ({latestTerm?.name || 'N/A'})
                   </p>

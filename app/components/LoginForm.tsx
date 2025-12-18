@@ -29,17 +29,24 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-xl border border-slate-800 bg-slate-900/60 p-8 shadow-lg">
-        <div className="text-center">
-          <h1 className="text-3xl font-semibold text-slate-50">AVault</h1>
-          <p className="mt-2 text-sm text-slate-400">
-            Sign in with your Google account
+    <div className="flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md space-y-8 rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/90 to-slate-800/50 backdrop-blur-xl p-10 shadow-2xl shadow-slate-900/50">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25 mb-2">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-50 via-emerald-100 to-slate-50 bg-clip-text text-transparent">
+            AVault
+          </h1>
+          <p className="text-sm text-slate-400">
+            Sign in with your Google account to continue
           </p>
         </div>
 
         {error && (
-          <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+          <div className="rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400 backdrop-blur-sm">
             {error}
           </div>
         )}
@@ -47,13 +54,16 @@ export default function LoginForm() {
         <button
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 rounded-lg border border-slate-700 bg-white px-4 py-3 font-medium text-slate-900 shadow-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="group relative w-full flex items-center justify-center gap-3 rounded-xl border border-slate-700/50 bg-white px-5 py-3.5 font-semibold text-slate-900 shadow-lg shadow-slate-900/20 transition-all hover:shadow-xl hover:scale-[1.02] hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 active:scale-[0.98]"
         >
           {loading ? (
-            'Signing in...'
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600"></div>
+              <span>Signing in...</span>
+            </div>
           ) : (
             <>
-              <svg className="h-5 w-5" viewBox="0 0 24 24">
+              <svg className="h-5 w-5 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
                 <path
                   fill="currentColor"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

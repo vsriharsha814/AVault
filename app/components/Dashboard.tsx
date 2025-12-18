@@ -149,67 +149,113 @@ export default function Dashboard() {
   });
 
   return (
-    <main className="min-h-screen px-6 py-8 sm:px-8 lg:px-10">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-50">
+          <div className="space-y-1">
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-50 via-emerald-100 to-slate-50 bg-clip-text text-transparent">
               AVault Dashboard
             </h1>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="text-sm text-slate-400 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Welcome back, {user?.email}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => auth && signOut(auth)}
-              className="rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-800"
+              className="group relative rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50"
             >
               Sign Out
             </button>
             <Link
               href="/sessions/new"
-              className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-emerald-50 shadow-sm hover:bg-emerald-400"
+              className="group relative rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/40 hover:scale-105 active:scale-95"
             >
-              New Count Session
+              <span className="relative z-10 flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                New Count Session
+              </span>
             </Link>
           </div>
         </header>
 
         {/* Summary cards */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              Total Items
-            </p>
-            <p className="mt-2 text-xl font-semibold text-slate-50">
-              {loading ? '...' : items.length}
-            </p>
+          <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/10">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
+            <div className="relative">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="rounded-lg bg-emerald-500/10 p-2">
+                  <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Total Items
+                </p>
+              </div>
+              <p className="text-3xl font-bold text-slate-50">
+                {loading ? <span className="animate-pulse">...</span> : items.length.toLocaleString()}
+              </p>
+            </div>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              Categories
-            </p>
-            <p className="mt-2 text-xl font-semibold text-slate-50">
-              {loading ? '...' : categories.length}
-            </p>
+          <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/10">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
+            <div className="relative">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="rounded-lg bg-blue-500/10 p-2">
+                  <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Categories
+                </p>
+              </div>
+              <p className="text-3xl font-bold text-slate-50">
+                {loading ? <span className="animate-pulse">...</span> : categories.length.toLocaleString()}
+              </p>
+            </div>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              Latest Session
-            </p>
-            <p className="mt-2 text-sm font-semibold text-slate-50">
-              {loading ? '...' : latestSession?.name || 'No sessions yet'}
-            </p>
+          <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/10">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
+            <div className="relative">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="rounded-lg bg-purple-500/10 p-2">
+                  <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Latest Session
+                </p>
+              </div>
+              <p className="text-lg font-bold text-slate-50 line-clamp-1">
+                {loading ? <span className="animate-pulse">...</span> : latestSession?.name || <span className="text-slate-500">No sessions yet</span>}
+              </p>
+            </div>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              Current Term
-            </p>
-            <p className="mt-2 text-sm font-semibold text-slate-50">
-              {loading ? '...' : currentTerm?.name || 'Not configured'}
-            </p>
+          <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/10">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
+            <div className="relative">
+              <div className="mb-3 flex items-center gap-3">
+                <div className="rounded-lg bg-amber-500/10 p-2">
+                  <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Current Term
+                </p>
+              </div>
+              <p className="text-lg font-bold text-slate-50">
+                {loading ? <span className="animate-pulse">...</span> : currentTerm?.name || <span className="text-slate-500">Not configured</span>}
+              </p>
+            </div>
           </div>
         </section>
 
@@ -217,27 +263,39 @@ export default function Dashboard() {
         <section className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             {/* Inventory by Category */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-semibold text-slate-100">Inventory by Category</h2>
-                <span className="text-xs text-slate-500">
+            <div className="rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-50 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    Inventory by Category
+                  </h2>
+                </div>
+                <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
                   {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'}
                 </span>
               </div>
 
               {/* Search and Filter */}
-              <div className="mb-4 space-y-2">
-                <input
-                  type="text"
-                  placeholder="Search items..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                />
+              <div className="mb-6 space-y-3">
+                <div className="relative">
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search items, locations, or serial numbers..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm pl-10 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 transition-all focus:border-emerald-500/50 focus:bg-slate-800/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  />
+                </div>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="w-full rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-3 text-sm text-slate-100 transition-all focus:border-emerald-500/50 focus:bg-slate-800/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 >
                   <option value="">All Categories</option>
                   {categories.map((cat) => (
@@ -249,67 +307,85 @@ export default function Dashboard() {
               </div>
 
               {loading ? (
-                <div className="mt-4 text-sm text-slate-400">Loading...</div>
+                <div className="flex items-center justify-center py-12">
+                  <div className="flex items-center gap-3 text-slate-400">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-emerald-500"></div>
+                    <span className="text-sm">Loading inventory...</span>
+                  </div>
+                </div>
               ) : Object.keys(itemsByCategory).length === 0 ? (
-                <div className="mt-4 text-sm text-slate-400">
-                  {searchQuery || selectedCategory ? 'No items match your filters.' : 'No items yet. Add items manually.'}
+                <div className="rounded-xl border border-slate-800/50 bg-slate-900/30 p-8 text-center">
+                  <svg className="mx-auto h-12 w-12 text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
+                  <p className="text-sm text-slate-400">
+                    {searchQuery || selectedCategory ? 'No items match your filters.' : 'No items yet. Add items manually.'}
+                  </p>
                 </div>
               ) : (
-                <div className="mt-4 space-y-3">
+                <div className="space-y-3">
                   {Object.entries(itemsByCategory).map(([categoryName, categoryItems]) => {
                     const isExpanded = expandedCategories.has(categoryName);
                     const totalQuantity = categoryItems.reduce((sum, item) => sum + getLatestCount(item.id), 0);
                     
                     return (
-                      <div key={categoryName} className="rounded-lg border border-slate-800 bg-slate-900/50 overflow-hidden">
+                      <div key={categoryName} className="group rounded-xl border border-slate-800/50 bg-slate-900/30 backdrop-blur-sm overflow-hidden transition-all hover:border-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50">
                         <button
                           onClick={() => toggleCategory(categoryName)}
-                          className="w-full flex items-center justify-between p-3 hover:bg-slate-800/50 transition-colors"
+                          className="w-full flex items-center justify-between p-4 hover:bg-slate-800/30 transition-all"
                         >
-                          <div className="flex items-center gap-3">
-                            <span className="text-slate-400">{isExpanded ? '▼' : '▶'}</span>
+                          <div className="flex items-center gap-4">
+                            <div className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${
+                              isExpanded ? 'bg-emerald-500/20 text-emerald-400 rotate-90' : 'bg-slate-800/50 text-slate-400'
+                            }`}>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
                             <div className="text-left">
-                              <h3 className="font-medium text-slate-200">{categoryName}</h3>
-                              <p className="text-xs text-slate-500 mt-0.5">
-                                {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'} • Total: {totalQuantity}
+                              <h3 className="font-semibold text-slate-200">{categoryName}</h3>
+                              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
+                                <span>{categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}</span>
+                                <span>•</span>
+                                <span className="font-medium text-emerald-400">Total: {totalQuantity}</span>
                               </p>
                             </div>
                           </div>
                         </button>
                         {isExpanded && (
-                          <div className="border-t border-slate-800 bg-slate-900/30">
+                          <div className="border-t border-slate-800/50 bg-slate-900/20 animate-in slide-in-from-top-2">
                             <div className="overflow-x-auto">
                               <table className="w-full">
-                                <thead className="bg-slate-800/30">
+                                <thead className="bg-slate-800/20">
                                   <tr>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Item</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Location</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Condition</th>
-                                    <th className="px-4 py-2 text-right text-xs font-medium text-slate-400 uppercase">Latest Count</th>
+                                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Item</th>
+                                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Location</th>
+                                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Condition</th>
+                                    <th className="px-5 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Latest Count</th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-800">
+                                <tbody className="divide-y divide-slate-800/50">
                                   {categoryItems.map((item) => {
                                     const latestCount = getLatestCount(item.id);
                                     return (
-                                      <tr key={item.id} className="hover:bg-slate-800/20">
-                                        <td className="px-4 py-2 text-sm font-medium text-slate-200">{item.name}</td>
-                                        <td className="px-4 py-2 text-sm text-slate-400">{item.location || '-'}</td>
-                                        <td className="px-4 py-2 text-sm text-slate-400">
+                                      <tr key={item.id} className="hover:bg-slate-800/20 transition-colors">
+                                        <td className="px-5 py-3 text-sm font-medium text-slate-200">{item.name}</td>
+                                        <td className="px-5 py-3 text-sm text-slate-400">{item.location || '-'}</td>
+                                        <td className="px-5 py-3 text-sm">
                                           {item.condition ? (
-                                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${
-                                              item.condition.toLowerCase().includes('excellent') ? 'bg-emerald-500/20 text-emerald-400' :
-                                              item.condition.toLowerCase().includes('good') ? 'bg-blue-500/20 text-blue-400' :
-                                              item.condition.toLowerCase().includes('poor') || item.condition.toLowerCase().includes('bad') || item.condition.toLowerCase().includes('needs') ? 'bg-red-500/20 text-red-400' :
-                                              'bg-slate-700/50 text-slate-300'
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${
+                                              item.condition.toLowerCase().includes('excellent') ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                                              item.condition.toLowerCase().includes('good') ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                                              item.condition.toLowerCase().includes('poor') || item.condition.toLowerCase().includes('bad') || item.condition.toLowerCase().includes('needs') ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                                              'bg-slate-700/50 text-slate-300 border border-slate-600/50'
                                             }`}>
                                               {item.condition}
                                             </span>
                                           ) : '-'}
                                         </td>
-                                        <td className="px-4 py-2 text-sm text-slate-300 text-right font-medium">
+                                        <td className="px-5 py-3 text-sm text-right">
                                           {latestCount > 0 ? (
-                                            <span className="inline-flex items-center px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 font-semibold">
+                                            <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 min-w-[3rem]">
                                               {latestCount}
                                             </span>
                                           ) : (
@@ -332,35 +408,49 @@ export default function Dashboard() {
             </div>
 
             {/* Recent Sessions */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-slate-100">Recent Sessions</h2>
-                <button className="text-xs font-medium text-emerald-400 hover:text-emerald-300">
-                  View all
+            <div className="rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-slate-50 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Recent Sessions
+                </h2>
+                <button className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
+                  View all →
                 </button>
               </div>
               {loading ? (
-                <div className="mt-4 text-sm text-slate-400">Loading...</div>
+                <div className="flex items-center justify-center py-8">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-emerald-500"></div>
+                </div>
               ) : sessions.length === 0 ? (
-                <p className="mt-4 text-sm text-slate-400">No sessions yet. Create one to get started.</p>
+                <div className="rounded-xl border border-slate-800/50 bg-slate-900/30 p-6 text-center">
+                  <p className="text-sm text-slate-400">No sessions yet. Create one to get started.</p>
+                </div>
               ) : (
-                <div className="mt-4 space-y-2">
+                <div className="space-y-2">
                   {sessions.slice(0, 5).map((session) => (
                     <div
                       key={session.id}
-                      className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/50 p-3"
+                      className="group flex items-center justify-between rounded-xl border border-slate-800/50 bg-slate-900/30 backdrop-blur-sm p-4 transition-all hover:border-slate-700/50 hover:bg-slate-800/30 hover:shadow-md"
                     >
-                      <div>
-                        <p className="text-sm font-medium text-slate-200">{session.name}</p>
-                        <p className="text-xs text-slate-500">
-                          {session.date?.toDate?.().toLocaleDateString() || 'No date'}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <div className={`h-2 w-2 rounded-full ${
+                          session.isComplete ? 'bg-emerald-500' : 'bg-yellow-500 animate-pulse'
+                        }`}></div>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-200">{session.name}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {session.date?.toDate?.().toLocaleDateString() || 'No date'}
+                          </p>
+                        </div>
                       </div>
                       <span
-                        className={`rounded-full px-2 py-1 text-xs font-medium ${
+                        className={`rounded-full px-3 py-1 text-xs font-semibold border ${
                           session.isComplete
-                            ? 'bg-emerald-500/20 text-emerald-400'
-                            : 'bg-yellow-500/20 text-yellow-400'
+                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                            : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
                         }`}
                       >
                         {session.isComplete ? 'Complete' : 'In Progress'}
@@ -373,31 +463,48 @@ export default function Dashboard() {
           </div>
 
           <aside className="space-y-6">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5">
-              <h2 className="text-sm font-semibold text-slate-100">Quick Actions</h2>
-              <div className="mt-3 space-y-2">
+            <div className="rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50">
+              <h2 className="text-xl font-bold text-slate-50 mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Quick Actions
+              </h2>
+              <div className="space-y-2">
                 <a
                   href="/users"
-                  className="block w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-700"
+                  className="group flex items-center gap-3 w-full rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-3 text-left text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-md hover:translate-x-1"
                 >
+                  <svg className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
                   Manage Users
                 </a>
                 <Link
                   href="/items/new"
-                  className="block w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-700"
+                  className="group flex items-center gap-3 w-full rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-3 text-left text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-md hover:translate-x-1"
                 >
+                  <svg className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
                   Add New Item
                 </Link>
                 <Link
                   href="/reports"
-                  className="block w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-700"
+                  className="group flex items-center gap-3 w-full rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-3 text-left text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-md hover:translate-x-1"
                 >
+                  <svg className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
                   View Reports
                 </Link>
                 <Link
                   href="/semester-history"
-                  className="block w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-700"
+                  className="group flex items-center gap-3 w-full rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-3 text-left text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-md hover:translate-x-1"
                 >
+                  <svg className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
                   Semester History
                 </Link>
               </div>

@@ -71,31 +71,39 @@ function SemesterHistoryPageContent() {
   });
 
   return (
-    <div className="min-h-screen px-6 py-8 sm:px-8 lg:px-10">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-6">
         <header className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-50">Semester History</h1>
-            <p className="mt-1 text-sm text-slate-400">View inventory data by academic term</p>
+          <div className="space-y-1">
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-50 via-emerald-100 to-slate-50 bg-clip-text text-transparent flex items-center gap-3">
+              <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Semester History
+            </h1>
+            <p className="text-sm text-slate-400">View inventory data by academic term</p>
           </div>
           <Link
             href="/"
-            className="rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-800"
+            className="group rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50"
           >
-            Back to Dashboard
+            ← Back to Dashboard
           </Link>
         </header>
 
         {/* Term Selector */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <label htmlFor="term" className="block text-sm font-medium text-slate-300 mb-2">
+        <div className="rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50">
+          <label htmlFor="term" className="block text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+            <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
             Select Academic Term
           </label>
           <select
             id="term"
             value={selectedTermId}
             onChange={(e) => setSelectedTermId(e.target.value)}
-            className="w-full sm:w-auto rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="w-full sm:w-auto rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-3 text-slate-100 transition-all focus:border-emerald-500/50 focus:bg-slate-800/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
           >
             {terms.map((term) => (
               <option key={term.id} value={term.id}>
@@ -106,39 +114,71 @@ function SemesterHistoryPageContent() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-slate-400">Loading...</div>
+          <div className="flex items-center justify-center py-20">
+            <div className="flex items-center gap-3 text-slate-400">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-600 border-t-emerald-500"></div>
+              <span className="text-sm">Loading...</span>
+            </div>
+          </div>
         ) : selectedTerm ? (
           <div className="space-y-6">
             {/* Summary */}
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Total Items</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-50">{historicalCounts.length}</p>
+              <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="rounded-lg bg-blue-500/10 p-2">
+                    <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Items</p>
+                </div>
+                <p className="text-3xl font-bold text-slate-50">{historicalCounts.length.toLocaleString()}</p>
               </div>
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Total Quantity</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-50">
-                  {historicalCounts.reduce((sum, hc) => sum + hc.countedQuantity, 0)}
+              <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="rounded-lg bg-emerald-500/10 p-2">
+                    <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-5m-6 5h.01M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Quantity</p>
+                </div>
+                <p className="text-3xl font-bold text-slate-50">
+                  {historicalCounts.reduce((sum, hc) => sum + hc.countedQuantity, 0).toLocaleString()}
                 </p>
               </div>
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Categories</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-50">{Object.keys(countsByCategory).length}</p>
+              <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="rounded-lg bg-purple-500/10 p-2">
+                    <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Categories</p>
+                </div>
+                <p className="text-3xl font-bold text-slate-50">{Object.keys(countsByCategory).length.toLocaleString()}</p>
               </div>
             </div>
 
             {/* Inventory by Category */}
             {Object.keys(countsByCategory).length === 0 ? (
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-8 text-center text-slate-400">
-                No data found for {selectedTerm.name}
+              <div className="rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-12 text-center shadow-xl shadow-slate-900/50">
+                <svg className="mx-auto h-12 w-12 text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+                <p className="text-slate-400">No data found for {selectedTerm.name}</p>
               </div>
             ) : (
               <div className="space-y-6">
                 {Object.entries(countsByCategory).map(([categoryName, categoryCounts]) => (
-                  <div key={categoryName} className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
-                    <div className="bg-slate-800/50 px-4 py-3">
-                      <h2 className="text-lg font-semibold text-slate-100">
-                        {categoryName} ({categoryCounts.length} items)
+                  <div key={categoryName} className="rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl overflow-hidden shadow-xl shadow-slate-900/50">
+                    <div className="bg-slate-800/30 backdrop-blur-sm px-6 py-4 border-b border-slate-800/50">
+                      <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                        {categoryName} <span className="text-sm font-normal text-slate-400">({categoryCounts.length} items)</span>
                       </h2>
                     </div>
                     <div className="overflow-x-auto">
