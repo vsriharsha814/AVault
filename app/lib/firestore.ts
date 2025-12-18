@@ -12,6 +12,7 @@ import {
   orderBy,
   Timestamp,
   QueryConstraint,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -57,10 +58,22 @@ export async function getCategory(id: string): Promise<Category | null> {
 
 export async function createCategory(name: string): Promise<string> {
   const docRef = await addDoc(getCategoriesCollection(), {
-    name: name.toUpperCase(),
+    name: name.trim(),
     createdAt: Timestamp.now(),
   });
   return docRef.id;
+}
+
+export async function updateCategory(id: string, name: string): Promise<void> {
+  const docRef = doc(requireDb(), 'categories', id);
+  await updateDoc(docRef, {
+    name: name.trim(),
+  });
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  const docRef = doc(requireDb(), 'categories', id);
+  await deleteDoc(docRef);
 }
 
 // Academic Terms
@@ -108,16 +121,26 @@ export async function createAcademicTerm(
 export const getItemsCollection = () => collection(requireDb(), 'items');
 
 export async function getItems(categoryId?: string): Promise<Item[]> {
-  const constraints: QueryConstraint[] = [orderBy('name')];
+  let constraints: QueryConstraint[] = [];
+  
   if (categoryId) {
-    constraints.unshift(where('categoryId', '==', categoryId));
+    // When filtering by category, don't use orderBy to avoid needing composite index
+    // We'll sort in memory instead
+    constraints.push(where('categoryId', '==', categoryId));
+  } else {
+    // Only use orderBy when not filtering (no composite index needed)
+    constraints.push(orderBy('name'));
   }
+  
   const snapshot = await getDocs(query(getItemsCollection(), ...constraints));
-  return snapshot.docs.map((doc) => ({
+  const items = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
     createdAt: doc.data().createdAt || Timestamp.now(),
   })) as Item[];
+  
+  // Sort by name in memory (works for both filtered and unfiltered queries)
+  return items.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getItem(id: string): Promise<Item | null> {
@@ -142,6 +165,16 @@ export async function createItem(item: Omit<Item, 'id' | 'createdAt'>): Promise<
 export async function updateItem(id: string, updates: Partial<Item>): Promise<void> {
   const docRef = doc(requireDb(), 'items', id);
   await updateDoc(docRef, updates);
+}
+
+export async function updateItemsCategory(itemIds: string[], newCategoryId: string): Promise<void> {
+  const db = requireDb();
+  const batch = writeBatch(db);
+  itemIds.forEach((itemId) => {
+    const itemRef = doc(db, 'items', itemId);
+    batch.update(itemRef, { categoryId: newCategoryId });
+  });
+  await batch.commit();
 }
 
 export async function deleteItem(id: string): Promise<void> {
