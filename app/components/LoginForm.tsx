@@ -20,10 +20,23 @@ export default function LoginForm() {
 
     try {
       const provider = new GoogleAuthProvider();
+      // signInWithPopup opens a popup window (similar to a new tab)
+      // This is the standard Firebase Auth popup method
       await signInWithPopup(auth, provider);
       // User record will be created/updated in AuthGuard after successful sign-in
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      setLoading(false);
+    } catch (err) {
+      // Handle specific error codes
+      const error = err as { code?: string; message?: string };
+      if (error.code === 'auth/popup-blocked') {
+        setError('Popup was blocked by your browser. Please allow popups for this site and try again.');
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        setError('Sign-in was cancelled. Please try again.');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        setError('This domain is not authorized. Please contact an administrator.');
+      } else {
+        setError(error.message || 'Authentication failed');
+      }
       setLoading(false);
     }
   };
