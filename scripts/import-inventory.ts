@@ -36,7 +36,7 @@ if (fs.existsSync(serviceAccountPath)) {
       projectId: projectId,
     });
     console.log('✅ Using Application Default Credentials\n');
-  } catch (error) {
+  } catch {
     console.error('❌ Firebase Admin initialization failed!');
     console.error('\nYou need to either:');
     console.error('1. Create a service account key and set FIREBASE_SERVICE_ACCOUNT_PATH');
@@ -146,8 +146,10 @@ async function importInventory() {
       }
       
       termMap.set(termName, termRef.id);
-    } catch (error: any) {
-      const errorMsg = `Error importing term ${termName}: ${error.message}`;
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error 
+        ? `Error importing term ${termName}: ${error.message}`
+        : `Error importing term ${termName}: ${String(error)}`;
       console.error(`  ❌ ${errorMsg}`);
       stats.errors.push(errorMsg);
     }
@@ -213,14 +215,18 @@ async function importInventory() {
             
             stats.historicalCounts++;
           }
-        } catch (error: any) {
-          const errorMsg = `Error importing item ${item.name}: ${error.message}`;
+        } catch (error: unknown) {
+          const errorMsg = error instanceof Error
+            ? `Error importing item ${item.name}: ${error.message}`
+            : `Error importing item ${item.name}: ${String(error)}`;
           console.error(`  ❌ ${errorMsg}`);
           stats.errors.push(errorMsg);
         }
       }
-    } catch (error: any) {
-      const errorMsg = `Error importing category ${category.name}: ${error.message}`;
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error
+        ? `Error importing category ${category.name}: ${error.message}`
+        : `Error importing category ${category.name}: ${String(error)}`;
       console.error(`❌ ${errorMsg}`);
       stats.errors.push(errorMsg);
     }
