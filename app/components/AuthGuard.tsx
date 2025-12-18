@@ -9,7 +9,9 @@ import LoginForm from './LoginForm';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
-  const [user, loading, error] = useAuthState(auth || undefined);
+  // Cast auth here because it can be null at runtime if Firebase isn't configured;
+  // we handle that case explicitly below with `if (!auth)`.
+  const [user, loading, error] = useAuthState(auth as any);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
