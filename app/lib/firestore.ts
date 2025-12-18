@@ -309,6 +309,53 @@ export async function createHistoricalCount(
   return docRef.id;
 }
 
+export async function createOrUpdateHistoricalCount(
+  itemId: string,
+  academicTermId: string,
+  countedQuantity: number
+): Promise<void> {
+  const existingQuery = query(
+    getHistoricalCountsCollection(),
+    where('itemId', '==', itemId),
+    where('academicTermId', '==', academicTermId)
+  );
+  const existing = await getDocs(existingQuery);
+
+  if (!existing.empty) {
+    const docRef = doc(requireDb(), 'historicalCounts', existing.docs[0].id);
+    await updateDoc(docRef, {
+      countedQuantity,
+      importedAt: Timestamp.now(),
+    });
+  } else {
+    await addDoc(getHistoricalCountsCollection(), {
+      itemId,
+      academicTermId,
+      countedQuantity,
+      importedAt: Timestamp.now(),
+    });
+  }
+}
+
+export async function syncHistoricalCountsFromSession(
+  sessionId: string,
+  academicTermId: string
+): Promise<void> {
+  const countsSnapshot = await getDocs(
+    query(getInventoryCountsCollection(), where('sessionId', '==', sessionId))
+  );
+
+  const updates = countsSnapshot.docs.map(async (docSnap) => {
+    const data = docSnap.data() as {
+      itemId: string;
+      countedQuantity: number;
+    };
+    return createOrUpdateHistoricalCount(data.itemId, academicTermId, data.countedQuantity);
+  });
+
+  await Promise.all(updates);
+}
+
 // Users Collection
 export const getUsersCollection = () => collection(requireDb(), 'users');
 

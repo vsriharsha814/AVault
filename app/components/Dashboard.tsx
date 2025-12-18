@@ -11,6 +11,7 @@ import {
   getAcademicTerms,
   getHistoricalCounts,
 } from '../lib/firestore';
+import { getCurrentTerm, getTermDisplayName } from '../lib/terms';
 import type { Category, Item, InventorySession, AcademicTerm, HistoricalCount } from '../types';
 import Link from 'next/link';
 
@@ -124,7 +125,12 @@ export default function Dashboard() {
     setExpandedCategories(newExpanded);
   };
 
-  const currentTerm = terms[0]; // Most recent term
+  // Determine current term based on date (CU Boulder calendar)
+  const currentTermInfo = getCurrentTerm();
+
+  // Latest academic term that exists in Firestore (represents last time inventory was updated)
+  const latestDbTerm = terms.length > 0 ? terms[0] : undefined;
+  
   const latestSession = sessions[0]; // Most recent session
 
   // Filter items by search and category
@@ -250,12 +256,29 @@ export default function Dashboard() {
                   </svg>
                 </div>
                 <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Current Term
-            </p>
+                  Current Term
+                </p>
               </div>
               <p className="text-sm sm:text-base lg:text-lg font-bold text-slate-50">
-                {loading ? <span className="animate-pulse">...</span> : currentTerm?.name || <span className="text-slate-500">Not configured</span>}
-            </p>
+                {loading ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  <span>{currentTermInfo.name}</span>
+                )}
+              </p>
+              <p className="mt-1 text-[10px] sm:text-xs text-slate-400">
+                {loading ? (
+                  <span className="animate-pulse">Checking last update…</span>
+                ) : latestDbTerm ? (
+                  <>
+                    Last updated:{' '}
+                    {latestDbTerm.name ||
+                      getTermDisplayName(latestDbTerm.term, latestDbTerm.year)}
+                  </>
+                ) : (
+                  'No academic terms found yet'
+                )}
+              </p>
             </div>
           </div>
         </section>
