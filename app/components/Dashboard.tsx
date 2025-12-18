@@ -16,7 +16,9 @@ import type { Category, Item, InventorySession, AcademicTerm, HistoricalCount } 
 import Link from 'next/link';
 
 export default function Dashboard() {
-  const [user] = useAuthState(auth || undefined);
+  // Cast auth because it can be null when Firebase isn't configured; that case
+  // is handled in AuthGuard higher up in the tree.
+  const [user] = useAuthState(auth as any);
   const [items, setItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [sessions, setSessions] = useState<InventorySession[]>([]);

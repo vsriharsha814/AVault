@@ -14,7 +14,9 @@ import type { User } from '../types';
 import Link from 'next/link';
 
 export default function UsersPage() {
-  const [currentUser, userLoading] = useAuthState(auth || undefined);
+  // Cast auth because it can be null when Firebase isn't configured; that case
+  // is handled in AuthGuard wrapping this page.
+  const [currentUser, userLoading] = useAuthState(auth as any);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserData, setCurrentUserData] = useState<User | null>(null);

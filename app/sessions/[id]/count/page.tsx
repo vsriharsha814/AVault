@@ -22,7 +22,9 @@ function CountSessionPageContent() {
   const params = useParams();
   const router = useRouter();
   const sessionId = params.id as string;
-  const [user] = useAuthState(auth || undefined);
+  // Cast auth because it can be null when Firebase isn't configured; that case
+  // is handled in AuthGuard wrapping this page.
+  const [user] = useAuthState(auth as any);
   
   const [session, setSession] = useState<InventorySession | null>(null);
   const [items, setItems] = useState<Item[]>([]);
