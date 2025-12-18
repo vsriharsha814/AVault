@@ -1,0 +1,2254 @@
+{
+  "metadata": {
+    "title": "UMC-AV-Inventory",
+    "as_of": "May 2025",
+    "inventory_periods": [
+      "Summer 2018",
+      "SUMMER 2019",
+      "FALL 2020",
+      "SUMMER 2021",
+      "SUMMER 2022",
+      "SPRING 2024",
+      "SUMMER 2025"
+    ]
+  },
+  "categories": [
+    {
+      "name": "WIRED MICS",
+      "items": [
+        {
+          "name": "Shure SM-57",
+          "inventory_counts": {
+            "Summer 2018": 33,
+            "SUMMER 2019": 31,
+            "FALL 2020": 30,
+            "SUMMER 2021": 30,
+            "SUMMER 2022": 31,
+            "SPRING 2024": 29,
+            "SUMMER 2025": 29
+          },
+          "location": "GMB",
+          "condition": "Good (1 needs re-soldering)"
+        },
+        {
+          "name": "Shure SM-58",
+          "inventory_counts": {
+            "Summer 2018": 10,
+            "SUMMER 2019": 8,
+            "FALL 2020": 8,
+            "SUMMER 2021": 8,
+            "SUMMER 2022": 12,
+            "SPRING 2024": 12,
+            "SUMMER 2025": 9
+          },
+          "location": "GMB",
+          "condition": "Good"
+        },
+        {
+          "name": "Peavey",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2021": 1,
+            "SUMMER 2022": 0,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB",
+          "condition": "Good"
+        },
+        {
+          "name": "PZM (USB)",
+          "inventory_counts": {
+            "Summer 2018": 0,
+            "SUMMER 2019": 0,
+            "FALL 2020": 0,
+            "SUMMER 2021": 0,
+            "SUMMER 2022": 0,
+            "SPRING 2024": 9,
+            "SUMMER 2025": 7
+          },
+          "location": "GMB",
+          "condition": "Excellent",
+          "serial_number_frequency": "MXL AC-404"
+        },
+        {
+          "name": "PZM (XLR)",
+          "inventory_counts": {
+            "Summer 2018": 2,
+            "SUMMER 2019": 2,
+            "FALL 2020": 2,
+            "SUMMER 2021": 2,
+            "SUMMER 2022": 2,
+            "SPRING 2024": 2,
+            "SUMMER 2025": 2
+          },
+          "location": "GMB",
+          "condition": "Good",
+          "serial_number_frequency": "Shure MX391/C"
+        }
+      ]
+    },
+    {
+      "name": "WIRELESS MIC KITS",
+      "items": [
+        {
+          "name": "Extra LAVS (3 BLX-1 + 2 Guitar mics)",
+          "inventory_counts": {
+            "SPRING 2024": 3,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB AV Closet",
+          "condition": "Good",
+          "serial_number_frequency": "Freq 5.84-6.08"
+        },
+        {
+          "name": "Portable Mic Kit #1 BLX4 (HH & LAV)",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB AV Closet",
+          "condition": "Good",
+          "serial_number_frequency": "Freq 5.84-6.08"
+        },
+        {
+          "name": "Portable Mic Kit #2 - GLDX (HH & LAV)",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB - Podium",
+          "condition": "Bad 2.4GHz band is no good",
+          "serial_number_frequency": "Freq 2.4-2.4835"
+        },
+        {
+          "name": "Portable Mic Kit#3 - GLDX (LAV)",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB - Podium",
+          "condition": "Bad 2.4GHz band is no good",
+          "serial_number_frequency": "Freq 2.4-2.4835"
+        },
+        {
+          "name": "Portable Mic Kit #4 - SLX (HH)",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB AV Closet",
+          "condition": "Poor: Needs Replacement",
+          "serial_number_frequency": "Freq 5.72-5.96"
+        },
+        {
+          "name": "Portable Mic Kit #5 - BLX4 (HH)",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB AV Closet",
+          "condition": "Good",
+          "serial_number_frequency": "Freq 5.42-5.72"
+        },
+        {
+          "name": "Portable Mic Kit #6 - SLX4 (HH & LAV)",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB AV Closet",
+          "condition": "Poor: Needs Replacement",
+          "serial_number_frequency": "Freq 6.38-6.62"
+        },
+        {
+          "name": "Portable Mic Kit #7 - SLX4 (LAV)",
+          "inventory_counts": {
+            "SPRING 2024": 1
+          },
+          "location": "GMB AV Closet",
+          "condition": "Poor: Needs Replacement",
+          "serial_number_frequency": "Freq 6.38-6.62"
+        },
+        {
+          "name": "Protable Mic Kit #8 - SLX4 (LAV)",
+          "inventory_counts": {
+            "SPRING 2024": 1
+          },
+          "location": "GMB AV Closet",
+          "condition": "Poor: Needs Replacement",
+          "serial_number_frequency": "Freq 6.38-6.62"
+        },
+        {
+          "name": "GMB Podium Mic Kits - GLX (HH)",
+          "inventory_counts": {
+            "SUMMER 2022": 2,
+            "SPRING 2024": 2
+          },
+          "location": "GMB",
+          "condition": "1 = good;, 2 = poor/needs replacement",
+          "serial_number_frequency": "Freq 2.4-2.835"
+        },
+        {
+          "name": "GMB Mic Kits - BLX4R (HH & LAV)",
+          "inventory_counts": {
+            "SUMMER 2022": 6,
+            "SPRING 2024": 6
+          },
+          "location": "GMB",
+          "condition": "Mic #1 reciever needs replacement; the rest are in good condition",
+          "serial_number_frequency": "Freq 512-542"
+        },
+        {
+          "name": "Aspens Mic Kit #1 - SLX4 (HH)",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "Aspens",
+          "condition": "Could benefit from upgrade",
+          "serial_number_frequency": "Freq 572-596"
+        },
+        {
+          "name": "Aspens Mic Kits #2 - SLX4 (HH)",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "Aspens",
+          "condition": "Could benefit from upgrade",
+          "serial_number_frequency": "Freq 6.38-6.22"
+        },
+        {
+          "name": "235 Mic Kit #1- GLXD4 (LAV + HH)",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": 235,
+          "condition": "Bad 2.4GHz band is no good",
+          "serial_number_frequency": "Freq 2.4-2.4835"
+        },
+        {
+          "name": "235 Mic Kit #2 - GLXD4 (HH)",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": 235,
+          "condition": "Bad 2.4GHz band is no good",
+          "serial_number_frequency": "Freq 2.4-2.4835"
+        },
+        {
+          "name": "235 Mic Kit #3 - GLXD4R+ (HH)",
+          "inventory_counts": {
+            "SPRING 2024": 1
+          },
+          "location": 235,
+          "condition": "Bad 2.4GHz band is no good",
+          "serial_number_frequency": "Freq 2.4-2.4835 +5.725-5.85"
+        },
+        {
+          "name": "235 Mic Kit #4 - GLXD4R+ (HH)",
+          "inventory_counts": {
+            "SPRING 2024": 1
+          },
+          "location": 235,
+          "condition": "Bad 2.4GHz band is no good",
+          "serial_number_frequency": "Freq 2.4-2.4835 +5.725-5.85"
+        }
+      ]
+    },
+    {
+      "name": "MIXERS",
+      "items": [
+        {
+          "name": "Allen & Heath SQ6",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB",
+          "condition": "Excellent"
+        },
+        {
+          "name": "Soundcraft - 6 Ch.",
+          "inventory_counts": {
+            "SPRING 2024": 6,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB",
+          "condition": "Excellent"
+        },
+        {
+          "name": "Soundcraft - 8 Ch.",
+          "inventory_counts": {
+            "Summer 2018": 2,
+            "SUMMER 2019": 2,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB",
+          "condition": "Broken (only 5/8 XLR Inputs work)",
+          "serial_number_frequency": "S/N LDHAD0457"
+        },
+        {
+          "name": "Soundcraft - EFX12 -  12 Ch.",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "tent (seasonal), Basement (winter)",
+          "condition": "Excellent",
+          "serial_number_frequency": "RW5734 162572"
+        },
+        {
+          "name": "Soundcraft - 24 Ch. (Analog)",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 0
+          },
+          "location": "Basement?",
+          "condition": "Good (Outdated)",
+          "serial_number_frequency": "RW5736 156377"
+        },
+        {
+          "name": "Yamaha - 20 Ch.",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB",
+          "condition": "Good (outdated)",
+          "serial_number_frequency": "RW5748SM150707"
+        },
+        {
+          "name": "Yamaha 16 Ch.",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 0
+          },
+          "location": "Basement",
+          "serial_number_frequency": "uccqo01119"
+        },
+        {
+          "name": "Mackie Pro FX12 - 12 Ch.",
+          "inventory_counts": {
+            "SPRING 2024": 1
+          },
+          "location": "Aspens",
+          "condition": "Excellent"
+        },
+        {
+          "name": "Mackie 808M FR (Powered Mixer)",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2021": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "Basement",
+          "condition": "Good",
+          "serial_number_frequency": "(21) WE50062"
+        },
+        {
+          "name": "Yorkville M1610 - Compact Audio Mixer",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 2,
+            "FALL 2020": 2,
+            "SUMMER 2022": 2,
+            "SPRING 2024": 1
+          },
+          "location": "Basement",
+          "condition": "Good",
+          "serial_number_frequency": "sn 9091289 sn 9091285"
+        },
+        {
+          "name": "QSC Touchmix Pro Mixer",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB",
+          "condition": "Good (outdated console)"
+        }
+      ]
+    },
+    {
+      "name": "AMPS & PREAMPS & EQ",
+      "items": [
+        {
+          "name": "Behringer U-Phoria UM2 Preamp",
+          "inventory_counts": {
+            "SPRING 2024": 4,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB (3), Aspens (1)",
+          "condition": "Excellent"
+        },
+        {
+          "name": "Mackie Power Amplifier (Elanor)",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 0
+          }
+        },
+        {
+          "name": "Behringer Europower EP4000 Power Amplifier",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 2,
+            "FALL 2020": 2,
+            "SPRING 2024": 0
+          },
+          "serial_number_frequency": "n1001280a37 /"
+        },
+        {
+          "name": "Behringer Europower EP2000 Power Amplifier",
+          "inventory_counts": {
+            "SPRING 2024": 1
+          },
+          "location": "Basement",
+          "condition": "Good"
+        },
+        {
+          "name": "Gemini XPM 900 Power Amplifier",
+          "inventory_counts": {
+            "SPRING 2024": 1
+          },
+          "location": "Basement",
+          "condition": "Good"
+        },
+        {
+          "name": "ART EQ-355 Parametric EQ",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 3,
+            "SUMMER 2025": 3
+          },
+          "location": "235 (1), Tent (1), Basement (1)",
+          "condition": "Excellent",
+          "serial_number_frequency": "9091285 / 9091289"
+        },
+        {
+          "name": "Behringer (DJ SYSTEM)",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 0,
+            "SUMMER 2025": 0
+          },
+          "serial_number_frequency": "N1001272A37"
+        },
+        {
+          "name": "Peavey Stereo Power Amp CS800",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 2,
+            "FALL 2020": 2,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "Dennis Smalls",
+          "condition": "Good",
+          "serial_number_frequency": "sn g0115456 / sn G0115469"
+        }
+      ]
+    },
+    {
+      "name": "SNAKES/PRESS BOXES",
+      "items": [
+        {
+          "name": "Whirlwind 12 Ch.",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB",
+          "condition": "Good"
+        },
+        {
+          "name": "Whirlwind 16 Ch.",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB",
+          "condition": "Good"
+        },
+        {
+          "name": "Whirlwind 24 Ch.",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB",
+          "condition": "Good"
+        },
+        {
+          "name": "Live Wire 16 Ch.",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2021": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB",
+          "condition": "Good"
+        },
+        {
+          "name": "Live Wire 24 Ch.",
+          "inventory_counts": {
+            "SPRING 2024": 1
+          },
+          "location": "GMB",
+          "condition": "Good"
+        },
+        {
+          "name": "Rapco 8 Ch.",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 0
+          },
+          "location": "Basement?Can't find"
+        },
+        {
+          "name": "Pro-Conex 8 Ch.",
+          "inventory_counts": {
+            "Summer 2018": 3,
+            "SUMMER 2019": 3,
+            "FALL 2020": 3,
+            "SUMMER 2022": 2,
+            "SPRING 2024": 0
+          },
+          "location": "Basement?Can't find"
+        },
+        {
+          "name": "Supersonic SC-23",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2022": 0,
+            "SPRING 2024": 0
+          },
+          "serial_number_frequency": "1239345 7C"
+        }
+      ]
+    },
+    {
+      "name": "TVS",
+      "items": [
+        {
+          "name": "Sharp 70\" (Mobile - On Cart)",
+          "inventory_counts": {
+            "Summer 2018": 2,
+            "SUMMER 2019": 2,
+            "FALL 2020": 2,
+            "SUMMER 2021": 2,
+            "SUMMER 2022": 2,
+            "SPRING 2024": 2,
+            "SUMMER 2025": 2
+          },
+          "location": "4th Floor AV Closet",
+          "condition": "Good",
+          "serial_number_frequency": "LC-70LE660U / 502865880 / 501854460"
+        },
+        {
+          "name": "Sharp 50\" (Mobile - On Cart)",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "4th Floor AV Closet",
+          "condition": "Good",
+          "serial_number_frequency": "LC-60le65OU / 302852979"
+        },
+        {
+          "name": "Samsung 55\" (Mobile - On Cart)",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "4th Floor AV Closet",
+          "condition": "Good"
+        },
+        {
+          "name": "Samsung (Mobile - On Cart)",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "4th Floor AV Closet"
+        },
+        {
+          "name": "NEC (Mobile - Not On Cart)",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 1
+          },
+          "location": "4th Floor AV Closet"
+        },
+        {
+          "name": "VIZIO (Wall Mounted)",
+          "inventory_counts": {
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 2,
+            "SUMMER 2025": 1
+          },
+          "location": 140,
+          "condition": "Bad - not working",
+          "serial_number_frequency": "E43e2 SN  snlwzjvwat3101507"
+        },
+        {
+          "name": "Samsung 85\" (Wall Mounted)",
+          "inventory_counts": {
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2021": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": 245,
+          "condition": "Good",
+          "serial_number_frequency": "0A3L3CANC03440"
+        },
+        {
+          "name": "Sharp (Wall Mounted)",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2021": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": 245,
+          "condition": "Good"
+        },
+        {
+          "name": "Sharp (Wall Mounted)",
+          "inventory_counts": {
+            "Summer 2018": 2,
+            "SUMMER 2019": 2,
+            "FALL 2020": 2,
+            "SUMMER 2021": 2,
+            "SUMMER 2022": 2,
+            "SPRING 2024": 3,
+            "SUMMER 2025": 1
+          },
+          "location": 247,
+          "condition": "Good"
+        },
+        {
+          "name": "Samsung (Wall Mounted)",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2021": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": 304,
+          "condition": "Good"
+        },
+        {
+          "name": "Sharp (Wall Mounted)",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2021": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": 351,
+          "condition": "Good"
+        },
+        {
+          "name": "Samsung (Wall Mounted)",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2021": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": 418,
+          "condition": "Good"
+        },
+        {
+          "name": "Samsung 55\" (personal monitor)",
+          "inventory_counts": {
+            "SUMMER 2025": 1
+          },
+          "location": "Basement (Mobile cart)"
+        }
+      ]
+    },
+    {
+      "name": "SPEAKERS",
+      "items": [
+        {
+          "name": "JBL (powered wedge)",
+          "inventory_counts": {
+            "SUMMER 2019": 2,
+            "FALL 2020": 2,
+            "SPRING 2024": 2,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB - center",
+          "condition": "Excellent",
+          "serial_number_frequency": "sn p130907664 sn p130907749"
+        },
+        {
+          "name": "JBL(Subwoofer)",
+          "inventory_counts": {
+            "SUMMER 2025": 2
+          },
+          "location": "GMB - center"
+        },
+        {
+          "name": "Yamaha S112V",
+          "inventory_counts": {
+            "Summer 2018": 2,
+            "SUMMER 2019": 4,
+            "FALL 2020": 4,
+            "SUMMER 2022": 4,
+            "SPRING 2024": 4,
+            "SUMMER 2025": 6
+          },
+          "location": "GMB",
+          "condition": "Good",
+          "serial_number_frequency": "sn 21c01201 / sn 21 c01228 / sn 21oj01228 / sn 21oj01204 -fuzzy DJ Sys Speakers"
+        },
+        {
+          "name": "Yorkville Elite E-12",
+          "inventory_counts": {
+            "Summer 2018": 4,
+            "SUMMER 2019": 4,
+            "FALL 2020": 4,
+            "SUMMER 2022": 4,
+            "SPRING 2024": 4,
+            "SUMMER 2025": 3
+          },
+          "location": "Basement",
+          "condition": "Good",
+          "serial_number_frequency": "sn 0011813 sn 0011812 sn 0011814 sn 0011831"
+        },
+        {
+          "name": "Subwoofers",
+          "inventory_counts": {
+            "Summer 2018": 2,
+            "SUMMER 2019": 2,
+            "FALL 2020": 2,
+            "SUMMER 2022": 2,
+            "SPRING 2024": 2,
+            "SUMMER 2025": 2
+          },
+          "location": "Tent (seasonal), Basement (winter)",
+          "condition": "Good",
+          "serial_number_frequency": "DJ System"
+        },
+        {
+          "name": "Fostex 4\" monitor",
+          "inventory_counts": {
+            "SUMMER 2025": 1
+          },
+          "location": "GMB - Center podium"
+        },
+        {
+          "name": "Yamaha DHR12M 12\" Active Floor Monitor",
+          "inventory_counts": {
+            "SUMMER 2025": 2
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "RCA boom box",
+          "inventory_counts": {
+            "SUMMER 2022": 1,
+            "SPRING 2024": 0,
+            "SUMMER 2025": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "STANDS (SPEAKERS & MICS)",
+      "items": [
+        {
+          "name": "Mic Stands (tripod)",
+          "inventory_counts": {
+            "SPRING 2024": 8,
+            "SUMMER 2025": 13
+          },
+          "location": "4th floor, 235, GMB"
+        },
+        {
+          "name": "Mic stand (Small)",
+          "inventory_counts": {
+            "SPRING 2024": 25,
+            "SUMMER 2025": 25
+          },
+          "location": "GMB, 235"
+        },
+        {
+          "name": "Mic Stands (straight)",
+          "inventory_counts": {
+            "SPRING 2024": 13,
+            "SUMMER 2025": 11
+          },
+          "location": "4th floor, 235, GMB"
+        },
+        {
+          "name": "Guitar Stands",
+          "inventory_counts": {
+            "SPRING 2024": 4,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Ultimate Support Systems spkr stand",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 4,
+            "SUMMER 2025": 6
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Yorkville spkr stand",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 0,
+            "SUMMER 2025": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "PROJECTORS",
+      "items": [
+        {
+          "name": "Epson G6050W",
+          "inventory_counts": {
+            "Summer 2018": 7,
+            "SUMMER 2019": 7,
+            "FALL 2020": 7,
+            "SPRING 2024": 4,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB (1), BASEMENT (3)",
+          "serial_number_frequency": "T7CF390147L / T7CF390209L / T7CF440098L / T7CF350082L"
+        },
+        {
+          "name": "Epson G6070W",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 2
+          },
+          "location": "Basement",
+          "condition": "Outdated"
+        },
+        {
+          "name": "Epson 955 WH Power Lite",
+          "inventory_counts": {
+            "SUMMER 2019": 3,
+            "FALL 2020": 3,
+            "SPRING 2024": 3,
+            "SUMMER 2025": 3
+          },
+          "location": "404 (1), Basement (2)",
+          "condition": "Outdated",
+          "serial_number_frequency": "vslk6401487 / vslk6401249"
+        },
+        {
+          "name": "Epson 1985WU",
+          "inventory_counts": {
+            "Summer 2018": 7,
+            "SUMMER 2019": 7,
+            "FALL 2020": 7
+          },
+          "serial_number_frequency": "V5MF6Y0156L / VSLK6900628 / VSLK6900762 / VSLK6900761 /"
+        },
+        {
+          "name": "Epson Powerlite 822+",
+          "inventory_counts": {
+            "SUMMER 2019": 0,
+            "SPRING 2024": 2
+          },
+          "location": "4th floor"
+        },
+        {
+          "name": "Panasonic (now Epson EB-L775U) (Center)",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "(GMB Middle)",
+          "condition": "Excellent  (1 Bulb Replaced Nov 2023)",
+          "serial_number_frequency": "SN SW4336015   Bulb ET-LAD310A/AC"
+        }
+      ]
+    },
+    {
+      "name": "LAZER PROJECTORS",
+      "items": [
+        {
+          "name": "Epson East Ballroom L1500UNL",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "East GMB",
+          "serial_number_frequency": "X2YR7X0026L"
+        },
+        {
+          "name": "Epson West Ballroom L1500UNL",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "West GMB",
+          "serial_number_frequency": "X2YR7X0027L"
+        },
+        {
+          "name": "Epson PowerLite L610U",
+          "inventory_counts": {
+            "SUMMER 2019": 3,
+            "FALL 2020": 3,
+            "SPRING 2024": 1
+          },
+          "location": "Basement",
+          "serial_number_frequency": "SE PROJ- X5rs890011L    SW PROJ- X5 rs890009L"
+        },
+        {
+          "name": "Epson Center Ballroom",
+          "inventory_counts": {
+            "SPRING 2024": 0,
+            "SUMMER 2025": 1
+          },
+          "location": "Center GMB"
+        },
+        {
+          "name": "Epson EB3L730U",
+          "inventory_counts": {
+            "SPRING 2024": 6
+          },
+          "location": "Basement",
+          "condition": "235 (3), 380's (3)"
+        }
+      ]
+    },
+    {
+      "name": "PHONE DVD BLURAY ETC",
+      "items": [
+        {
+          "name": "Sony DVD  DVPSR210P",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 2
+          },
+          "serial_number_frequency": "sn 6875973"
+        },
+        {
+          "name": "Dynex DX-DVD2",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 0,
+            "SUMMER 2025": 0
+          },
+          "serial_number_frequency": "SN 10E0519608"
+        },
+        {
+          "name": "Supersonic DVD",
+          "inventory_counts": {
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 0,
+            "SUMMER 2025": 0
+          },
+          "serial_number_frequency": "SN 231111009790"
+        },
+        {
+          "name": "Sony Bluray BDP-S1700",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 3
+          },
+          "location": "GMB",
+          "condition": "Good",
+          "serial_number_frequency": "sn 12393457C"
+        },
+        {
+          "name": "Tascam CD A-500",
+          "inventory_counts": {
+            "SUMMER 2019": 0,
+            "SPRING 2024": 1
+          },
+          "location": "Basement",
+          "condition": "Outated - needs to go"
+        },
+        {
+          "name": "PHD-VRX HDTV Tuner/Receiver",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 0,
+            "SPRING 2024": 0,
+            "SUMMER 2025": 0
+          },
+          "location": "Distro",
+          "condition": "Broken"
+        },
+        {
+          "name": "CD Player",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "Basement",
+          "condition": "Outdated"
+        }
+      ]
+    },
+    {
+      "name": "LAPTOPS/iPads",
+      "items": [
+        {
+          "name": "Macbook",
+          "inventory_counts": {
+            "Summer 2018": 2,
+            "SUMMER 2019": 2,
+            "FALL 2020": 2,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 0
+          },
+          "location": "Sent off to Distro",
+          "condition": "Outdated",
+          "serial_number_frequency": "macbook pro sn W87041VNWOG /"
+        },
+        {
+          "name": "iPad",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB",
+          "condition": "Excellent"
+        }
+      ]
+    },
+    {
+      "name": "AUDIO RECORDERS & VIDEO",
+      "items": [
+        {
+          "name": "Logitec group",
+          "inventory_counts": {
+            "SUMMER 2021": 2,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 2
+          },
+          "location": "GMB/Aspens",
+          "serial_number_frequency": "sn2021lz57k4d8 / sn 2021LZ58U148"
+        },
+        {
+          "name": "Logitech Rally",
+          "inventory_counts": {
+            "SUMMER 2025": 1
+          },
+          "location": "Basement"
+        },
+        {
+          "name": "Canon XA-10 DV Camcorder",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2021": 1,
+            "SPRING 2024": 0
+          },
+          "serial_number_frequency": "sn 452260000577"
+        },
+        {
+          "name": "OWL Cameras",
+          "inventory_counts": {
+            "SUMMER 2021": 2,
+            "SUMMER 2022": 2,
+            "SPRING 2024": 4,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB (2), 4th floor (2)",
+          "serial_number_frequency": "m2fn31212457 / M2FN31212343"
+        },
+        {
+          "name": "Tascam DR-05",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 0
+          },
+          "serial_number_frequency": "sn 0467688"
+        },
+        {
+          "name": "Tascam DR-07",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 1
+          },
+          "location": "GMB",
+          "serial_number_frequency": "sn 0182116"
+        },
+        {
+          "name": "Zoom recorder",
+          "inventory_counts": {
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB",
+          "serial_number_frequency": "B9328400"
+        },
+        {
+          "name": "Manfrotto 055XB camera tripod",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SPRING 2024": 0,
+            "SUMMER 2025": 1
+          }
+        },
+        {
+          "name": "Zeikos camera tripod (for logitech)",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 2,
+            "SUMMER 2025": 1
+          },
+          "location": "Aspens (1), 4th floor (1)"
+        },
+        {
+          "name": "Vangaurd Camera Tripop",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Dynex DX-SW040 camera monopod",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "SUMMER 2022": 1,
+            "SPRING 2024": 0,
+            "SUMMER 2025": 0
+          }
+        },
+        {
+          "name": "SproLink Video Mixer NeoLIVE R2",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB",
+          "condition": "Excellent"
+        },
+        {
+          "name": "8 Port Gigabit Desktop Switch - TP Link",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 3
+          },
+          "location": "GMB",
+          "condition": "Excellent"
+        },
+        {
+          "name": "5 Port Gigabit Desktop Switch - TP Link",
+          "inventory_counts": {
+            "SPRING 2024": 3,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB",
+          "condition": "Excellent"
+        },
+        {
+          "name": "HDMI 4 Port Splitter",
+          "inventory_counts": {
+            "SPRING 2024": 4,
+            "SUMMER 2025": 5
+          },
+          "location": "GMB",
+          "condition": "Excellent"
+        },
+        {
+          "name": "DVD Writer",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 2
+          },
+          "location": "GMB",
+          "condition": "Excellent"
+        },
+        {
+          "name": "MD-LX HDMI/SDI BiDirectional Converter",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 2
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "MD-HX HDMI/SDI Cross Converter",
+          "inventory_counts": {
+            "SPRING 2024": 4,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Micro Converter BiDirectional SDI/HDMI 3G - Black Magic",
+          "inventory_counts": {
+            "SPRING 2024": 4,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "HDMI Audio Extractor - Insignia",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 2
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Shinybow SB-3866 Multivideo Switcher",
+          "inventory_counts": {
+            "Summer 2018": 3,
+            "SUMMER 2019": 1,
+            "FALL 2020": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        }
+      ]
+    },
+    {
+      "name": "XLR's",
+      "items": [
+        {
+          "name": "1' - 2'",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "SPRING 2024": 7,
+            "SUMMER 2025": 10
+          },
+          "location": "GMB, 235"
+        },
+        {
+          "name": "3'-7'",
+          "inventory_counts": {
+            "Summer 2018": 18,
+            "SUMMER 2019": 18,
+            "SPRING 2024": 24,
+            "SUMMER 2025": 3
+          },
+          "location": "GMB, 235"
+        },
+        {
+          "name": "10'",
+          "inventory_counts": {
+            "Summer 2018": 7,
+            "SUMMER 2019": 7,
+            "SPRING 2024": 16,
+            "SUMMER 2025": 16
+          },
+          "location": "GMB, 235"
+        },
+        {
+          "name": "12'-15'",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "SPRING 2024": 8,
+            "SUMMER 2025": 23
+          },
+          "location": "GMB, 235"
+        },
+        {
+          "name": "20'",
+          "inventory_counts": {
+            "Summer 2018": 5,
+            "SUMMER 2019": 5,
+            "SPRING 2024": 11,
+            "SUMMER 2025": 14
+          },
+          "location": "GMB, 235"
+        },
+        {
+          "name": "25'",
+          "inventory_counts": {
+            "Summer 2018": 18,
+            "SUMMER 2019": 18,
+            "SPRING 2024": 24,
+            "SUMMER 2025": 17
+          },
+          "location": "GMB, 235"
+        },
+        {
+          "name": "30'-35'",
+          "inventory_counts": {
+            "Summer 2018": 4,
+            "SUMMER 2019": 4,
+            "SPRING 2024": 2,
+            "SUMMER 2025": 11
+          },
+          "location": "GMB, 235"
+        },
+        {
+          "name": "50'-60'",
+          "inventory_counts": {
+            "Summer 2018": 8,
+            "SUMMER 2019": 8,
+            "SPRING 2024": 11,
+            "SUMMER 2025": 11
+          },
+          "location": "GMB, 235"
+        },
+        {
+          "name": "100'",
+          "inventory_counts": {
+            "Summer 2018": 2,
+            "SUMMER 2019": 2,
+            "SPRING 2024": 8,
+            "SUMMER 2025": 5
+          },
+          "location": "GMB, 235"
+        }
+      ]
+    },
+    {
+      "name": "D-Plugs",
+      "items": [
+        {
+          "name": "3'-10'",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "SPRING 2024": 19,
+            "SUMMER 2025": 18
+          },
+          "location": "GMB",
+          "condition": "Excellent"
+        }
+      ]
+    },
+    {
+      "name": "HDMI CABLES",
+      "items": [
+        {
+          "name": "2'-6'",
+          "inventory_counts": {
+            "Summer 2018": 5,
+            "SUMMER 2019": 5,
+            "SPRING 2024": 19,
+            "SUMMER 2025": 13
+          },
+          "location": "GMB,235",
+          "condition": "Good"
+        },
+        {
+          "name": "10'-15'",
+          "inventory_counts": {
+            "SPRING 2024": 21,
+            "SUMMER 2025": 15
+          },
+          "location": "GMB,235",
+          "condition": "Good"
+        },
+        {
+          "name": "25'",
+          "inventory_counts": {
+            "SPRING 2024": 5,
+            "SUMMER 2025": 2
+          },
+          "location": "GMB,235",
+          "condition": "Good"
+        },
+        {
+          "name": "40'",
+          "inventory_counts": {
+            "SPRING 2024": 13,
+            "SUMMER 2025": 13
+          },
+          "location": "GMB,235",
+          "condition": "Good"
+        },
+        {
+          "name": "50'",
+          "inventory_counts": {
+            "Summer 2018": 2,
+            "SUMMER 2019": 2,
+            "SPRING 2024": 13,
+            "SUMMER 2025": 12
+          },
+          "location": "GMB,235",
+          "condition": "Good"
+        }
+      ]
+    },
+    {
+      "name": "ETHERNET",
+      "items": [
+        {
+          "name": "1-20'",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "SPRING 2024": "8+",
+            "SUMMER 2025": 15
+          },
+          "location": "GMB",
+          "condition": "Good"
+        },
+        {
+          "name": "25'",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "SPRING 2024": "8+",
+            "SUMMER 2025": 11
+          },
+          "location": "GMB",
+          "condition": "Good"
+        },
+        {
+          "name": "50'",
+          "inventory_counts": {
+            "SPRING 2024": "5+",
+            "SUMMER 2025": 1
+          },
+          "location": "GMB",
+          "condition": "Good"
+        },
+        {
+          "name": "100'",
+          "inventory_counts": {
+            "Summer 2018": 3,
+            "SUMMER 2019": 3,
+            "SPRING 2024": "4+",
+            "SUMMER 2025": 4
+          },
+          "location": "GMB",
+          "condition": "Good"
+        }
+      ]
+    },
+    {
+      "name": "POWER EXTENSION",
+      "items": [
+        {
+          "name": "6'",
+          "inventory_counts": {
+            "SUMMER 2025": 6
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "15'",
+          "inventory_counts": {
+            "SUMMER 2025": 16
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "25'",
+          "inventory_counts": {
+            "SUMMER 2025": 12
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "50'",
+          "inventory_counts": {
+            "SUMMER 2025": 8
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "100'",
+          "inventory_counts": {
+            "SUMMER 2025": 6
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Power Hubs (Tritaps)",
+          "inventory_counts": {
+            "SUMMER 2025": 14
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Power Strip (normal)",
+          "inventory_counts": {
+            "SUMMER 2025": 21
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Power Strip (Round VIP)",
+          "inventory_counts": {
+            "SUMMER 2025": 13
+          },
+          "location": "GMB"
+        }
+      ]
+    },
+    {
+      "name": "CHARGING CABLES",
+      "items": [
+        {
+          "name": "Laptop Chargers (Mostly Type C)",
+          "inventory_counts": {
+            "SUMMER 2025": 7
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB to USB-C",
+          "inventory_counts": {
+            "SUMMER 2025": 2
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB to Lightning",
+          "inventory_counts": {
+            "SUMMER 2025": 2
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB to Micro USB",
+          "inventory_counts": {
+            "SUMMER 2025": 9
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Power Bricks",
+          "inventory_counts": {
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB-C to USB-C",
+          "inventory_counts": {
+            "SUMMER 2025": 3
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB-C to Lightning",
+          "inventory_counts": {
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        }
+      ]
+    },
+    {
+      "name": "LIGHTING GEAR",
+      "items": [
+        {
+          "name": "Cham Sys Lighting Console",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB",
+          "condition": "Excellent"
+        }
+      ]
+    },
+    {
+      "name": "ACCESSORIES",
+      "items": [
+        {
+          "name": "Slide Advancers (Logitech)",
+          "inventory_counts": {
+            "Summer 2018": 3,
+            "SUMMER 2019": 3,
+            "SPRING 2024": 8,
+            "SUMMER 2025": 9
+          },
+          "location": "GMB & Podiums",
+          "condition": "Good"
+        },
+        {
+          "name": "Juice Goose 8.0 L Power Dist. Ctr.",
+          "inventory_counts": {
+            "Summer 2018": 1,
+            "SUMMER 2019": 1,
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "Tent (seasonal), Basement (winter)",
+          "condition": "Good"
+        },
+        {
+          "name": "Behringer Ultra DI Box DI600P (Passive)",
+          "inventory_counts": {
+            "Summer 2018": 4,
+            "SUMMER 2019": 4,
+            "FALL 2020": 4,
+            "SUMMER 2022": 4,
+            "SPRING 2024": 5,
+            "SUMMER 2025": 5
+          },
+          "location": "GMB",
+          "condition": "Good"
+        },
+        {
+          "name": "Other DI Boxes",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 7
+          },
+          "location": "GMB",
+          "condition": "Good"
+        }
+      ]
+    },
+    {
+      "name": "BATTERIES",
+      "items": [
+        {
+          "name": "(AA)",
+          "inventory_counts": {
+            "Summer 2018": 58,
+            "SUMMER 2019": 58,
+            "FALL 2020": 52,
+            "SPRING 2024": "Lots",
+            "SUMMER 2025": 18
+          },
+          "location": "GMB (14) Tent(4)",
+          "condition": "Good",
+          "serial_number_frequency": "LC-60LE650V/302852474"
+        },
+        {
+          "name": "(AAA)",
+          "inventory_counts": {
+            "Summer 2018": 22,
+            "SUMMER 2019": 22,
+            "FALL 2020": 20,
+            "SPRING 2024": "Lots",
+            "SUMMER 2025": 2
+          },
+          "location": "GMB",
+          "condition": "Good",
+          "serial_number_frequency": "06LG3CHJAO6913W"
+        },
+        {
+          "name": "Wireless Mic battery",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": "8, 2"
+          },
+          "location": "GMB, 235",
+          "condition": "Good"
+        }
+      ]
+    },
+    {
+      "name": "AUDIO ADAPTERS",
+      "items": [
+        {
+          "name": "Lightning to 3.5mm F",
+          "inventory_counts": {
+            "SPRING 2024": 19,
+            "SUMMER 2025": 17
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB-C to 3.5mm",
+          "inventory_counts": {
+            "SPRING 2024": 7,
+            "SUMMER 2025": 12
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "3.5mmto RCA",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 10
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "1/4 Splitter",
+          "inventory_counts": {
+            "SPRING 2024": 3,
+            "SUMMER 2025": 5
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "3.5mm to 1/4",
+          "inventory_counts": {
+            "SPRING 2024": 11,
+            "SUMMER 2025": 8
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Mic Stand adapter (Owl)",
+          "inventory_counts": {
+            "SPRING 2024": 3,
+            "SUMMER 2025": 3
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "3.5mm F to 3.5mm F",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "XLR (M) to XLR (M)",
+          "inventory_counts": {
+            "SPRING 2024": 14,
+            "SUMMER 2025": 12
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "XLR (F) to XLR (F)",
+          "inventory_counts": {
+            "SPRING 2024": 15,
+            "SUMMER 2025": 16
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "RCA(F) to RCA(F)",
+          "inventory_counts": {
+            "SPRING 2024": 24,
+            "SUMMER 2025": 3
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "RCA(F) to 3.5mm (M)",
+          "inventory_counts": {
+            "SPRING 2024": 6,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "RCA(M) to 1/4(M)",
+          "inventory_counts": {
+            "SPRING 2024": 5,
+            "SUMMER 2025": 5
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "RCA(F) to 1/4(M)",
+          "inventory_counts": {
+            "SPRING 2024": 6,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "XLR (M) to TRS",
+          "inventory_counts": {
+            "SPRING 2024": 10,
+            "SUMMER 2025": 17
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "XLR (F) to TRS",
+          "inventory_counts": {
+            "SUMMER 2025": 6
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "3.5mm to XLR(M) cable",
+          "inventory_counts": {
+            "SPRING 2024": 7,
+            "SUMMER 2025": 7
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "3.5mm to XLR(F) cable",
+          "inventory_counts": {
+            "SPRING 2024": 4,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "1/4 to XLR (M) cable",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 7
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "1/4 to XLR (F) cable",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "1/4 (F) to XLR (F) cable",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "XLR(M) to RCA (F)",
+          "inventory_counts": {
+            "SPRING 2024": 6,
+            "SUMMER 2025": 20
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "XLR(M) to RCA (M)",
+          "inventory_counts": {
+            "SPRING 2024": 2
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "1/4 Turnaround",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 13
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "XLR(F) to RCA (M)",
+          "inventory_counts": {
+            "SUMMER 2025": 2
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "XLR(F) to RCA (F)",
+          "inventory_counts": {
+            "SPRING 2024": 12,
+            "SUMMER 2025": 11
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "XLR (M) to TRS",
+          "inventory_counts": {
+            "SPRING 2024": 34,
+            "SUMMER 2025": 35
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "3.5mm M to 3.5mm M (AUX)",
+          "inventory_counts": {
+            "SPRING 2024": 6,
+            "SUMMER 2025": 6
+          },
+          "location": "GMB"
+        }
+      ]
+    },
+    {
+      "name": "VIDEO ADAPTERS",
+      "items": [
+        {
+          "name": "Mini display to HDMI",
+          "inventory_counts": {
+            "SPRING 2024": 5,
+            "SUMMER 2025": 43
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Mini display to VGA",
+          "inventory_counts": {
+            "SPRING 2024": 3,
+            "SUMMER 2025": 5
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "HDMI to DP",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB-C to USB-A HUB",
+          "inventory_counts": {
+            "SPRING 2024": 3,
+            "SUMMER 2025": 3
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB-C to Any HUB",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 13
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB-A to USB-A",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 0
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Micro HDMI to HDMI",
+          "inventory_counts": {
+            "SPRING 2024": 2,
+            "SUMMER 2025": 0
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "HDMI to VGA",
+          "inventory_counts": {
+            "SPRING 2024": 7,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Micro HDMI to VGA",
+          "inventory_counts": {
+            "SPRING 2024": 5,
+            "SUMMER 2025": 3
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "HDMI-HDMI (F-F)",
+          "inventory_counts": {
+            "SPRING 2024": 4,
+            "SUMMER 2025": 5
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "HDMI-HDMI (M-F) Perpendicular",
+          "inventory_counts": {
+            "SPRING 2024": 9,
+            "SUMMER 2025": 5
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "VGA(F) to DVI(M)",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 5
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB-C to HDMI",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 9
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB-C to VGA",
+          "inventory_counts": {
+            "SPRING 2024": 1,
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Mini DVI to VGA",
+          "inventory_counts": {
+            "SPRING 2024": 4,
+            "SUMMER 2025": 4
+          },
+          "location": "GMB"
+        }
+      ]
+    },
+    {
+      "name": "OUTDATED CORDS",
+      "items": [
+        {
+          "name": "Thunderbolt (M) to HDMI & VGA (F)",
+          "inventory_counts": {
+            "SUMMER 2025": 4
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "VGA (M) with 3.5mm to HDMI",
+          "inventory_counts": {
+            "SUMMER 2025": 2
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Mini HDMI (M) to VGA (F)",
+          "inventory_counts": {
+            "SUMMER 2025": 3
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "DP (M) to HDMI (F)",
+          "inventory_counts": {
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB (M) to Ethernet (F)",
+          "inventory_counts": {
+            "SUMMER 2025": 2
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "HDMI (M) to DVI (F)",
+          "inventory_counts": {
+            "SUMMER 2025": 4
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Mini HDMI (M) to HDMI (F)",
+          "inventory_counts": {
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Thunderbolt (M) to HDMI (F)",
+          "inventory_counts": {
+            "SUMMER 2025": 8
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Thunderbolt (M) to VGA (F)",
+          "inventory_counts": {
+            "SUMMER 2025": 3
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Thunderbolt (M) to DVI (F)",
+          "inventory_counts": {
+            "SUMMER 2025": 2
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "USB-C (M) to VGA (F)",
+          "inventory_counts": {
+            "SUMMER 2025": 3
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "DVI (M) to VGA (M)",
+          "inventory_counts": {
+            "SUMMER 2025": 5
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Mini DVI (M) to VGA (M)",
+          "inventory_counts": {
+            "SUMMER 2025": 1
+          },
+          "location": "GMB"
+        },
+        {
+          "name": "Wired Lav Headset",
+          "inventory_counts": {
+            "SUMMER 2025": 3
+          },
+          "location": "GMB"
+        }
+      ]
+    },
+    {
+      "name": "MISC",
+      "items": [
+        {
+          "name": "Sandbags",
+          "inventory_counts": {
+            "SPRING 2024": 5,
+            "SUMMER 2025": 9
+          },
+          "location": "GMB"
+        }
+      ]
+    },
+    {
+      "name": "AC",
+      "items": [
+        {
+          "name": "AC Cables (various types)",
+          "inventory_counts": {
+            "SUMMER 2025": 21
+          }
+        }
+      ]
+    },
+    {
+      "name": "WIRELESS MIC ACCESSORIES",
+      "items": [
+        {
+          "name": "Wireless Mic Pop Filters (sm57)",
+          "inventory_counts": {
+            "SUMMER 2025": 15
+          }
+        },
+        {
+          "name": "Wireless Mic Heads (sm58)",
+          "inventory_counts": {
+            "SUMMER 2025": 18
+          }
+        }
+      ]
+    },
+    {
+      "name": "HEADPHONES",
+      "items": [
+        {
+          "name": "Audio Technica m50x",
+          "inventory_counts": {
+            "SUMMER 2025": 2
+          },
+          "location": "GMB (1 booth 1 closet)"
+        },
+        {
+          "name": "Sony MDR-7506",
+          "inventory_counts": {
+            "SUMMER 2025": 2
+          },
+          "location": "GMB"
+        }
+      ]
+    }
+  ]
+}

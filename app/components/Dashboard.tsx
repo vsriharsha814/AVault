@@ -83,9 +83,6 @@ export default function Dashboard() {
             <button className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-emerald-50 shadow-sm hover:bg-emerald-400">
               New Count Session
             </button>
-            <button className="rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-800">
-              Import from Excel
-            </button>
           </div>
         </header>
 
@@ -135,7 +132,7 @@ export default function Dashboard() {
                 <div className="mt-4 text-sm text-slate-400">Loading...</div>
               ) : Object.keys(itemsByCategory).length === 0 ? (
                 <div className="mt-4 text-sm text-slate-400">
-                  No items yet. Import from Excel or add items manually.
+                  No items yet. Add items manually.
                 </div>
               ) : (
                 <div className="mt-4 space-y-4">
