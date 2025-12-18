@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { createOrUpdateUser } from '../lib/firestore';
+import { createOrUpdateUser, getUser } from '../lib/firestore';
 import LoginForm from './LoginForm';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
   const [user, loading, error] = useAuthState(auth || undefined);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -16,17 +19,48 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   // Create/update user record in Firestore when user signs in
   useEffect(() => {
+    // Reset state when user changes
     if (user && auth) {
+      setCheckingAuth(true);
+      setIsAuthorized(null); // Reset to prevent showing wrong state
+      
+      console.log('Creating/updating user record for:', user.email);
       createOrUpdateUser(
         user.uid,
         user.email || '',
         user.displayName || undefined,
         user.photoURL || undefined
-      ).catch((err) => {
-        console.error('Error creating/updating user record:', err);
-      });
+      )
+        .then(() => {
+          console.log('User record created/updated successfully');
+          // Check if user is authorized
+          return getUser(user.uid);
+        })
+        .then((userData) => {
+          console.log('User data retrieved:', userData);
+          const authorized = userData?.isAuthorized ?? false;
+          setIsAuthorized(authorized);
+          setCheckingAuth(false);
+        })
+        .catch((err) => {
+          console.error('Error creating/updating user record:', err);
+          console.error('Error details:', {
+            code: err.code,
+            message: err.message,
+            stack: err.stack,
+          });
+          setIsAuthorized(false);
+          setCheckingAuth(false);
+        });
+    } else if (!user && !loading) {
+      // No user and not loading - show login
+      setIsAuthorized(null);
+      setCheckingAuth(false);
+    } else if (!user && loading) {
+      // Still loading auth state
+      setCheckingAuth(true);
     }
-  }, [user]);
+  }, [user, loading]);
 
   // Show setup message if Firebase is not configured
   if (!auth) {
@@ -62,7 +96,8 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!mounted || loading) {
+  // Show loading while checking authentication or authorization
+  if (!mounted || loading || checkingAuth || (user && isAuthorized === null)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950">
         <div className="text-slate-400">Loading...</div>
@@ -83,6 +118,31 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     return <LoginForm />;
+  }
+
+  // Check if user is authorized - only show this after we've checked
+  if (isAuthorized === false) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
+        <div className="w-full max-w-md space-y-4 rounded-xl border border-red-800 bg-slate-900/60 p-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold text-red-400 mb-2">Access Denied</h1>
+            <p className="text-sm text-slate-400">
+              You don't have permission to access AVault.
+            </p>
+            <p className="mt-2 text-xs text-slate-500">
+              Please contact an administrator to grant you access.
+            </p>
+          </div>
+          <button
+            onClick={() => signOut(auth!)}
+            className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

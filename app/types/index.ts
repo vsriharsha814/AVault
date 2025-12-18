@@ -67,5 +67,6 @@ export interface User {
   lastLoginAt: Timestamp;
   createdAt: Timestamp;
   isAdmin?: boolean;
+  isAuthorized?: boolean; // Whether user has access to the site
 }
 

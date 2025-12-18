@@ -67,8 +67,10 @@ export async function createCategory(name: string): Promise<string> {
 export const getAcademicTermsCollection = () => collection(requireDb(), 'academicTerms');
 
 export async function getAcademicTerms(): Promise<AcademicTerm[]> {
+  // Order by year only (descending) - most recent first
+  // If you need to sort by both year and term, create a composite index in Firestore
   const snapshot = await getDocs(
-    query(getAcademicTermsCollection(), orderBy('year', 'desc'), orderBy('term', 'desc'))
+    query(getAcademicTermsCollection(), orderBy('year', 'desc'))
   );
   return snapshot.docs.map((doc) => ({
     id: doc.id,
@@ -295,29 +297,66 @@ export async function createOrUpdateUser(
   displayName?: string,
   photoURL?: string
 ): Promise<void> {
-  const userRef = doc(requireDb(), 'users', uid);
-  const userSnap = await getDoc(userRef);
+  try {
+    console.log('createOrUpdateUser called with:', { uid, email, displayName, photoURL });
+    const userRef = doc(requireDb(), 'users', uid);
+    console.log('User ref created:', userRef.path);
+    
+    const userSnap = await getDoc(userRef);
+    console.log('User document exists:', userSnap.exists());
 
-  if (userSnap.exists()) {
-    // Update existing user
-    await updateDoc(userRef, {
-      email,
-      displayName: displayName || null,
-      photoURL: photoURL || null,
-      lastLoginAt: Timestamp.now(),
-    });
-  } else {
-    // Create new user
-    await setDoc(userRef, {
-      id: uid,
-      email,
-      displayName: displayName || null,
-      photoURL: photoURL || null,
-      lastLoginAt: Timestamp.now(),
-      createdAt: Timestamp.now(),
-      isAdmin: false,
-    });
+    if (userSnap.exists()) {
+      // Update existing user (don't change isAuthorized on login)
+      console.log('Updating existing user');
+      await updateDoc(userRef, {
+        email,
+        displayName: displayName || null,
+        photoURL: photoURL || null,
+        lastLoginAt: Timestamp.now(),
+      });
+      console.log('User updated successfully');
+    } else {
+      // Create new user - not authorized by default
+      console.log('Creating new user document');
+      const userData = {
+        id: uid,
+        email,
+        displayName: displayName || null,
+        photoURL: photoURL || null,
+        lastLoginAt: Timestamp.now(),
+        createdAt: Timestamp.now(),
+        isAdmin: false,
+        isAuthorized: false, // New users need to be authorized by admin
+      };
+      console.log('User data to save:', userData);
+      await setDoc(userRef, userData);
+      console.log('User created successfully');
+    }
+  } catch (error: any) {
+    console.error('Error in createOrUpdateUser:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
+    throw error; // Re-throw to be caught by caller
   }
+}
+
+export async function authorizeUser(uid: string): Promise<void> {
+  const userRef = doc(requireDb(), 'users', uid);
+  await updateDoc(userRef, {
+    isAuthorized: true,
+  });
+}
+
+export async function revokeUserAccess(uid: string): Promise<void> {
+  const userRef = doc(requireDb(), 'users', uid);
+  await updateDoc(userRef, {
+    isAuthorized: false,
+  });
+}
+
+export async function deleteUser(uid: string): Promise<void> {
+  const userRef = doc(requireDb(), 'users', uid);
+  await deleteDoc(userRef);
 }
 
 export async function getAllUsers(): Promise<User[]> {

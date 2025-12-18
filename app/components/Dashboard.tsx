@@ -203,6 +203,12 @@ export default function Dashboard() {
             <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5">
               <h2 className="text-sm font-semibold text-slate-100">Quick Actions</h2>
               <div className="mt-3 space-y-2">
+                <a
+                  href="/users"
+                  className="block w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-700"
+                >
+                  Manage Users
+                </a>
                 <button className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-left text-sm text-slate-200 hover:bg-slate-700">
                   Add New Item
                 </button>
