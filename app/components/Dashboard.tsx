@@ -149,112 +149,113 @@ export default function Dashboard() {
   });
 
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-6">
+    <main className="min-h-screen px-3 py-4 sm:px-4 sm:py-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-4 sm:space-y-6">
         {/* Header */}
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <header className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-50 via-emerald-100 to-slate-50 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-50 via-emerald-100 to-slate-50 bg-clip-text text-transparent">
               AVault Dashboard
             </h1>
-            <p className="text-sm text-slate-400 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Welcome back, {user?.email}
+            <p className="text-xs sm:text-sm text-slate-400 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="truncate">Welcome back, {user?.email}</span>
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <button
               onClick={() => auth && signOut(auth)}
-              className="group relative rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50"
+              className="group relative rounded-lg sm:rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50"
             >
               Sign Out
             </button>
             <Link
               href="/sessions/new"
-              className="group relative rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/40 hover:scale-105 active:scale-95"
+              className="group relative rounded-lg sm:rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-2 sm:px-5 sm:py-2.5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/40 hover:scale-105 active:scale-95"
             >
-              <span className="relative z-10 flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                New Count Session
+                <span className="hidden sm:inline">New Count Session</span>
+                <span className="sm:hidden">New Session</span>
               </span>
             </Link>
           </div>
         </header>
 
         {/* Summary cards */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/10">
+        <section className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="group relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-3 sm:p-4 lg:p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/10">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
             <div className="relative">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="rounded-lg bg-emerald-500/10 p-2">
-                  <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
+                <div className="rounded-lg bg-emerald-500/10 p-1.5 sm:p-2">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Total Items
-                </p>
+                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Total Items
+            </p>
               </div>
-              <p className="text-3xl font-bold text-slate-50">
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-50">
                 {loading ? <span className="animate-pulse">...</span> : items.length.toLocaleString()}
-              </p>
+            </p>
             </div>
           </div>
-          <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/10">
+          <div className="group relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-3 sm:p-4 lg:p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/10">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
             <div className="relative">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="rounded-lg bg-blue-500/10 p-2">
-                  <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
+                <div className="rounded-lg bg-blue-500/10 p-1.5 sm:p-2">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                   </svg>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Categories
-                </p>
+                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Categories
+            </p>
               </div>
-              <p className="text-3xl font-bold text-slate-50">
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-50">
                 {loading ? <span className="animate-pulse">...</span> : categories.length.toLocaleString()}
-              </p>
+            </p>
             </div>
           </div>
-          <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/10">
+          <div className="group relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-3 sm:p-4 lg:p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/10">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
             <div className="relative">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="rounded-lg bg-purple-500/10 p-2">
-                  <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
+                <div className="rounded-lg bg-purple-500/10 p-1.5 sm:p-2">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Latest Session
-                </p>
+                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Latest Session
+            </p>
               </div>
-              <p className="text-lg font-bold text-slate-50 line-clamp-1">
+              <p className="text-sm sm:text-base lg:text-lg font-bold text-slate-50 line-clamp-1">
                 {loading ? <span className="animate-pulse">...</span> : latestSession?.name || <span className="text-slate-500">No sessions yet</span>}
-              </p>
+            </p>
             </div>
           </div>
           <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/10">
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
             <div className="relative">
-              <div className="mb-3 flex items-center gap-3">
-                <div className="rounded-lg bg-amber-500/10 p-2">
-                  <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
+                <div className="rounded-lg bg-amber-500/10 p-1.5 sm:p-2">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Current Term
-                </p>
+                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Current Term
+            </p>
               </div>
-              <p className="text-lg font-bold text-slate-50">
+              <p className="text-sm sm:text-base lg:text-lg font-bold text-slate-50">
                 {loading ? <span className="animate-pulse">...</span> : currentTerm?.name || <span className="text-slate-500">Not configured</span>}
-              </p>
+            </p>
             </div>
           </div>
         </section>
@@ -263,39 +264,40 @@ export default function Dashboard() {
         <section className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             {/* Inventory by Category */}
-            <div className="rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50">
-              <div className="flex items-center justify-between mb-6">
+            <div className="rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-4 sm:p-5 lg:p-6 shadow-xl shadow-slate-900/50">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-50 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <h2 className="text-base sm:text-lg lg:text-xl font-bold text-slate-50 flex items-center gap-1.5 sm:gap-2">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
-                    Inventory by Category
+                    <span className="hidden sm:inline">Inventory by Category</span>
+                    <span className="sm:hidden">Inventory</span>
                   </h2>
                 </div>
-                <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
-                  {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'}
+                <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-emerald-400 border border-emerald-500/20">
+                  {filteredItems.length}
                 </span>
               </div>
 
               {/* Search and Filter */}
-              <div className="mb-6 space-y-3">
+              <div className="mb-4 sm:mb-6 space-y-2 sm:space-y-3">
                 <div className="relative">
-                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   <input
                     type="text"
-                    placeholder="Search items, locations, or serial numbers..."
+                    placeholder="Search items..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm pl-10 pr-4 py-3 text-sm text-slate-100 placeholder-slate-500 transition-all focus:border-emerald-500/50 focus:bg-slate-800/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    className="w-full rounded-lg sm:rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 transition-all focus:border-emerald-500/50 focus:bg-slate-800/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                   />
                 </div>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-3 text-sm text-slate-100 transition-all focus:border-emerald-500/50 focus:bg-slate-800/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="w-full rounded-lg sm:rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-3 sm:px-4 py-2 sm:py-2.5 lg:py-3 text-xs sm:text-sm text-slate-100 transition-all focus:border-emerald-500/50 focus:bg-slate-800/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                 >
                   <option value="">All Categories</option>
                   {categories.map((cat) => (
@@ -323,30 +325,30 @@ export default function Dashboard() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {Object.entries(itemsByCategory).map(([categoryName, categoryItems]) => {
                     const isExpanded = expandedCategories.has(categoryName);
                     const totalQuantity = categoryItems.reduce((sum, item) => sum + getLatestCount(item.id), 0);
                     
                     return (
-                      <div key={categoryName} className="group rounded-xl border border-slate-800/50 bg-slate-900/30 backdrop-blur-sm overflow-hidden transition-all hover:border-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50">
+                      <div key={categoryName} className="group rounded-lg sm:rounded-xl border border-slate-800/50 bg-slate-900/30 backdrop-blur-sm overflow-hidden transition-all hover:border-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50">
                         <button
                           onClick={() => toggleCategory(categoryName)}
-                          className="w-full flex items-center justify-between p-4 hover:bg-slate-800/30 transition-all"
+                          className="w-full flex items-center justify-between p-2.5 sm:p-3 lg:p-4 hover:bg-slate-800/30 transition-all"
                         >
-                          <div className="flex items-center gap-4">
-                            <div className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${
+                          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 min-w-0 flex-1">
+                            <div className={`flex h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 items-center justify-center rounded-lg transition-all flex-shrink-0 ${
                               isExpanded ? 'bg-emerald-500/20 text-emerald-400 rotate-90' : 'bg-slate-800/50 text-slate-400'
                             }`}>
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                               </svg>
                             </div>
-                            <div className="text-left">
-                              <h3 className="font-semibold text-slate-200">{categoryName}</h3>
-                              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
+                            <div className="text-left min-w-0 flex-1">
+                              <h3 className="text-sm sm:text-base font-semibold text-slate-200 truncate">{categoryName}</h3>
+                              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 flex items-center gap-1.5 sm:gap-2">
                                 <span>{categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}</span>
-                                <span>•</span>
+                                <span className="hidden sm:inline">•</span>
                                 <span className="font-medium text-emerald-400">Total: {totalQuantity}</span>
                               </p>
                             </div>
@@ -354,14 +356,14 @@ export default function Dashboard() {
                         </button>
                         {isExpanded && (
                           <div className="border-t border-slate-800/50 bg-slate-900/20 animate-in slide-in-from-top-2">
-                            <div className="overflow-x-auto">
+                            <div className="overflow-x-auto -mx-2.5 sm:-mx-3 lg:-mx-4">
                               <table className="w-full">
                                 <thead className="bg-slate-800/20">
                                   <tr>
-                                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Item</th>
-                                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Location</th>
-                                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Condition</th>
-                                    <th className="px-5 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Latest Count</th>
+                                    <th className="px-3 py-2 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3 text-left text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider">Item</th>
+                                    <th className="px-3 py-2 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3 text-left text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:table-cell">Location</th>
+                                    <th className="px-3 py-2 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3 text-left text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider hidden md:table-cell">Condition</th>
+                                    <th className="px-3 py-2 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3 text-right text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider">Count</th>
                                   </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-800/50">
@@ -369,11 +371,16 @@ export default function Dashboard() {
                                     const latestCount = getLatestCount(item.id);
                                     return (
                                       <tr key={item.id} className="hover:bg-slate-800/20 transition-colors">
-                                        <td className="px-5 py-3 text-sm font-medium text-slate-200">{item.name}</td>
-                                        <td className="px-5 py-3 text-sm text-slate-400">{item.location || '-'}</td>
-                                        <td className="px-5 py-3 text-sm">
+                                        <td className="px-3 py-2 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3 text-xs sm:text-sm font-medium text-slate-200">
+                                          <div className="flex flex-col">
+                            <span>{item.name}</span>
+                                            <span className="text-[10px] sm:hidden text-slate-500 mt-0.5">{item.location || 'No location'}</span>
+                                          </div>
+                                        </td>
+                                        <td className="px-3 py-2 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3 text-xs sm:text-sm text-slate-400 hidden sm:table-cell">{item.location || '-'}</td>
+                                        <td className="px-3 py-2 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3 text-xs sm:text-sm hidden md:table-cell">
                                           {item.condition ? (
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${
+                                            <span className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-medium ${
                                               item.condition.toLowerCase().includes('excellent') ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
                                               item.condition.toLowerCase().includes('good') ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
                                               item.condition.toLowerCase().includes('poor') || item.condition.toLowerCase().includes('bad') || item.condition.toLowerCase().includes('needs') ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
@@ -383,9 +390,9 @@ export default function Dashboard() {
                                             </span>
                                           ) : '-'}
                                         </td>
-                                        <td className="px-5 py-3 text-sm text-right">
+                                        <td className="px-3 py-2 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3 text-xs sm:text-sm text-right">
                                           {latestCount > 0 ? (
-                                            <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 min-w-[3rem]">
+                                            <span className="inline-flex items-center justify-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 min-w-[2.5rem] sm:min-w-[3rem] text-xs sm:text-sm">
                                               {latestCount}
                                             </span>
                                           ) : (
@@ -439,11 +446,11 @@ export default function Dashboard() {
                         <div className={`h-2 w-2 rounded-full ${
                           session.isComplete ? 'bg-emerald-500' : 'bg-yellow-500 animate-pulse'
                         }`}></div>
-                        <div>
+                      <div>
                           <p className="text-sm font-semibold text-slate-200">{session.name}</p>
                           <p className="text-xs text-slate-500 mt-0.5">
-                            {session.date?.toDate?.().toLocaleDateString() || 'No date'}
-                          </p>
+                          {session.date?.toDate?.().toLocaleDateString() || 'No date'}
+                        </p>
                         </div>
                       </div>
                       <span
