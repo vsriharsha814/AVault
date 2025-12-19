@@ -411,26 +411,24 @@ export async function createOrUpdateUser(
   photoURL?: string
 ): Promise<void> {
   try {
-    console.log('createOrUpdateUser called with:', { uid, email, displayName, photoURL });
+    // Only log non-sensitive info in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('createOrUpdateUser called for uid:', uid);
+    }
     const userRef = doc(requireDb(), 'users', uid);
-    console.log('User ref created:', userRef.path);
     
     const userSnap = await getDoc(userRef);
-    console.log('User document exists:', userSnap.exists());
 
     if (userSnap.exists()) {
       // Update existing user (don't change isAuthorized on login)
-      console.log('Updating existing user');
       await updateDoc(userRef, {
         email,
         displayName: displayName || null,
         photoURL: photoURL || null,
         lastLoginAt: Timestamp.now(),
       });
-      console.log('User updated successfully');
     } else {
       // Create new user - not authorized by default
-      console.log('Creating new user document');
       const userData = {
         id: uid,
         email,
@@ -441,14 +439,14 @@ export async function createOrUpdateUser(
         isAdmin: false,
         isAuthorized: false, // New users need to be authorized by admin
       };
-      console.log('User data to save:', userData);
       await setDoc(userRef, userData);
-      console.log('User created successfully');
     }
   } catch (error: any) {
-    console.error('Error in createOrUpdateUser:', error);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
+    // Log error without sensitive details
+    console.error('Error in createOrUpdateUser:', {
+      code: error.code,
+      message: error.message,
+    });
     throw error; // Re-throw to be caught by caller
   }
 }

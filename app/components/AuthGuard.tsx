@@ -26,7 +26,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       setCheckingAuth(true);
       setIsAuthorized(null); // Reset to prevent showing wrong state
       
-      console.log('Creating/updating user record for:', user.email);
+      // Only log non-sensitive info in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Creating/updating user record for uid:', user.uid);
+      }
       createOrUpdateUser(
         user.uid,
         user.email || '',
@@ -34,22 +37,23 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         user.photoURL || undefined
       )
         .then(() => {
-          console.log('User record created/updated successfully');
           // Check if user is authorized
           return getUser(user.uid);
         })
         .then((userData) => {
-          console.log('User data retrieved:', userData);
+          // Only log non-sensitive info in development
+          if (process.env.NODE_ENV === 'development') {
+            console.log('User authorization status:', userData?.isAuthorized ?? false);
+          }
           const authorized = userData?.isAuthorized ?? false;
           setIsAuthorized(authorized);
           setCheckingAuth(false);
         })
         .catch((err) => {
-          console.error('Error creating/updating user record:', err);
-          console.error('Error details:', {
+          // Log error without sensitive stack traces
+          console.error('Error creating/updating user record:', {
             code: err.code,
             message: err.message,
-            stack: err.stack,
           });
           setIsAuthorized(false);
           setCheckingAuth(false);
