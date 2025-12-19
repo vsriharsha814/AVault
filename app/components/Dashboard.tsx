@@ -7,12 +7,11 @@ import { auth } from '../lib/firebase';
 import {
   getCategories,
   getItems,
-  getInventorySessions,
   getAcademicTerms,
   getHistoricalCounts,
 } from '../lib/firestore';
 import { getCurrentTerm, getTermDisplayName } from '../lib/terms';
-import type { Category, Item, InventorySession, AcademicTerm, HistoricalCount } from '../types';
+import type { Category, Item, AcademicTerm, HistoricalCount } from '../types';
 import Link from 'next/link';
 
 export default function Dashboard() {
@@ -21,7 +20,6 @@ export default function Dashboard() {
   const [user] = useAuthState(auth as any);
   const [items, setItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [sessions, setSessions] = useState<InventorySession[]>([]);
   const [terms, setTerms] = useState<AcademicTerm[]>([]);
   const [historicalCounts, setHistoricalCounts] = useState<HistoricalCount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,16 +36,14 @@ export default function Dashboard() {
   async function loadData() {
     try {
       setLoading(true);
-      const [itemsData, categoriesData, sessionsData, termsData, countsData] = await Promise.all([
+      const [itemsData, categoriesData, termsData, countsData] = await Promise.all([
         getItems(),
         getCategories(),
-        getInventorySessions(),
         getAcademicTerms(),
         getHistoricalCounts(),
       ]);
       setItems(itemsData);
       setCategories(categoriesData);
-      setSessions(sessionsData);
       setTerms(termsData);
       setHistoricalCounts(countsData);
       
@@ -132,8 +128,6 @@ export default function Dashboard() {
 
   // Latest academic term that exists in Firestore (represents last time inventory was updated)
   const latestDbTerm = terms.length > 0 ? terms[0] : undefined;
-  
-  const latestSession = sessions[0]; // Most recent session
 
   // Filter items by search and category
   const filteredItems = items.filter((item) => {
@@ -227,24 +221,6 @@ export default function Dashboard() {
               </div>
               <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-50">
                 {loading ? <span className="animate-pulse">...</span> : categories.length.toLocaleString()}
-            </p>
-            </div>
-          </div>
-          <div className="group relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-3 sm:p-4 lg:p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/10">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
-            <div className="relative">
-              <div className="mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
-                <div className="rounded-lg bg-purple-500/10 p-1.5 sm:p-2">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                </div>
-                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Latest Session
-            </p>
-              </div>
-              <p className="text-sm sm:text-base lg:text-lg font-bold text-slate-50 line-clamp-1">
-                {loading ? <span className="animate-pulse">...</span> : latestSession?.name || <span className="text-slate-500">No sessions yet</span>}
             </p>
             </div>
           </div>
@@ -439,59 +415,6 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Recent Sessions */}
-            <div className="rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-slate-50 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Recent Sessions
-                </h2>
-                <button className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
-                  View all →
-                </button>
-              </div>
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-emerald-500"></div>
-                </div>
-              ) : sessions.length === 0 ? (
-                <div className="rounded-xl border border-slate-800/50 bg-slate-900/30 p-6 text-center">
-                  <p className="text-sm text-slate-400">No sessions yet. Create one to get started.</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {sessions.slice(0, 5).map((session) => (
-                    <div
-                      key={session.id}
-                      className="group flex items-center justify-between rounded-xl border border-slate-800/50 bg-slate-900/30 backdrop-blur-sm p-4 transition-all hover:border-slate-700/50 hover:bg-slate-800/30 hover:shadow-md"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`h-2 w-2 rounded-full ${
-                          session.isComplete ? 'bg-emerald-500' : 'bg-yellow-500 animate-pulse'
-                        }`}></div>
-                      <div>
-                          <p className="text-sm font-semibold text-slate-200">{session.name}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                          {session.date?.toDate?.().toLocaleDateString() || 'No date'}
-                        </p>
-                        </div>
-                      </div>
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold border ${
-                          session.isComplete
-                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                            : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-                        }`}
-                      >
-                        {session.isComplete ? 'Complete' : 'In Progress'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
 
           <aside className="space-y-6">
