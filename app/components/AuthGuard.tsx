@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { signOut } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { auth, signOutAndClearCache } from '../lib/firebase';
 import { createOrUpdateUser, getUser } from '../lib/firestore';
 import LoginForm from './LoginForm';
 
@@ -141,7 +140,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
             </p>
           </div>
           <button
-            onClick={() => signOut(auth!)}
+            onClick={() => signOutAndClearCache(auth)}
             className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
           >
             Sign Out

@@ -1,5 +1,5 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+import { getAuth, Auth, signOut as firebaseSignOut } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -44,6 +44,61 @@ if (isFirebaseConfigured()) {
     console.error(
       '⚠️ Firebase is not configured. Please set up your Firebase environment variables in .env.local'
     );
+  }
+}
+
+/**
+ * Signs out the user and clears all browser cache/storage
+ * This ensures users can switch accounts on next sign-in
+ */
+export async function signOutAndClearCache(authInstance: Auth | null): Promise<void> {
+  if (!authInstance) {
+    return;
+  }
+
+  try {
+    // Sign out from Firebase
+    await firebaseSignOut(authInstance);
+  } catch (error) {
+    console.error('Error signing out:', error);
+  }
+
+  // Clear all browser storage
+  if (typeof window !== 'undefined') {
+    try {
+      // Clear localStorage (Firebase stores auth state here)
+      localStorage.clear();
+      
+      // Clear sessionStorage
+      sessionStorage.clear();
+      
+      // Clear IndexedDB if available (Firebase may use it)
+      if ('indexedDB' in window) {
+        try {
+          const databases = await indexedDB.databases();
+          await Promise.all(
+            databases.map(db => {
+              if (db.name) {
+                return new Promise<void>((resolve, reject) => {
+                  const deleteReq = indexedDB.deleteDatabase(db.name!);
+                  deleteReq.onsuccess = () => resolve();
+                  deleteReq.onerror = () => reject(deleteReq.error);
+                  deleteReq.onblocked = () => resolve(); // Resolve even if blocked
+                });
+              }
+            })
+          );
+        } catch (error) {
+          // IndexedDB clearing is best effort
+          console.warn('Could not clear all IndexedDB databases:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error clearing browser storage:', error);
+    }
+    
+    // Reload the page to ensure clean state
+    window.location.href = '/';
   }
 }
 

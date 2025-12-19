@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { signOut } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { auth, signOutAndClearCache } from '../lib/firebase';
 import {
   getCategories,
   getItems,
@@ -171,7 +170,7 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-wrap gap-2 sm:gap-3">
             <button
-              onClick={() => auth && signOut(auth)}
+              onClick={() => signOutAndClearCache(auth)}
               className="group relative rounded-lg sm:rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50"
             >
               Sign Out
