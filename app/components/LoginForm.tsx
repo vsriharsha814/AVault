@@ -28,25 +28,12 @@ export default function LoginForm() {
     } catch (err) {
       // Handle specific error codes
       const error = err as { code?: string; message?: string };
-      console.error('Authentication error:', {
-        code: error.code,
-        message: error.message,
-        currentDomain: window.location.hostname,
-        currentOrigin: window.location.origin,
-        fullUrl: window.location.href,
-      });
-      
       if (error.code === 'auth/popup-blocked') {
         setError('Popup was blocked by your browser. Please allow popups for this site and try again.');
       } else if (error.code === 'auth/popup-closed-by-user') {
         setError('Sign-in was cancelled. Please try again.');
       } else if (error.code === 'auth/unauthorized-domain') {
-        const currentDomain = window.location.hostname;
-        const currentOrigin = window.location.origin;
-        setError(
-          `This domain is not authorized. Current domain: ${currentDomain} (${currentOrigin}). ` +
-          `Please ensure this domain is added to Firebase Console > Authentication > Settings > Authorized domains.`
-        );
+        setError('This domain is not authorized. Please contact an administrator.');
       } else {
         setError(error.message || 'Authentication failed');
       }
