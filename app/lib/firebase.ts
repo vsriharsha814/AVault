@@ -11,6 +11,9 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// If you can't import in console, add this log in your code temporarily:
+console.log("firebaseConfig:", firebaseConfig);
+
 // Validate Firebase config
 const isFirebaseConfigured = () => {
   return !!(
