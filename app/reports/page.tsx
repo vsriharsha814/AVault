@@ -1,36 +1,84 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getItems, getCategories, getAcademicTerms, getHistoricalCounts } from '../lib/firestore';
-import type { Item, Category, AcademicTerm, HistoricalCount } from '../types';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../lib/firebase';
+import { getItems, getCategories, getAcademicTerms, getHistoricalCounts, getInventorySessions, getInventoryCounts } from '../lib/firestore';
+import type { Item, Category, AcademicTerm, HistoricalCount, InventorySession, InventoryCount } from '../types';
 import Link from 'next/link';
 import AuthGuard from '../components/AuthGuard';
 
 function ReportsPageContent() {
+  const [user] = useAuthState(auth!);
   const [items, setItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [terms, setTerms] = useState<AcademicTerm[]>([]);
   const [historicalCounts, setHistoricalCounts] = useState<HistoricalCount[]>([]);
+  const [sessions, setSessions] = useState<InventorySession[]>([]);
+  const [latestSessionCounts, setLatestSessionCounts] = useState<InventoryCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTerm, setSelectedTerm] = useState<string>('');
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (user) {
+      loadData();
+    }
+  }, [user]);
+
+  // Auto-refresh when page becomes visible or window regains focus (e.g., returning from a session)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && user) {
+        loadData();
+      }
+    };
+    
+    const handleFocus = () => {
+      if (user) {
+        loadData();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [user]);
 
   async function loadData() {
     try {
       setLoading(true);
-      const [itemsData, categoriesData, termsData, countsData] = await Promise.all([
+      const [itemsData, categoriesData, sessionsData, termsData, countsData] = await Promise.all([
         getItems(),
         getCategories(),
+        getInventorySessions(),
         getAcademicTerms(),
         getHistoricalCounts(),
       ]);
       setItems(itemsData);
       setCategories(categoriesData);
+      setSessions(sessionsData);
       setTerms(termsData);
       setHistoricalCounts(countsData);
+      
+      // Also load counts from the latest session (even if incomplete) to show most recent counts
+      // This ensures counts show immediately even before session is marked complete
+      if (sessionsData.length > 0) {
+        const latestSession = sessionsData[0];
+        try {
+          const latestCounts = await getInventoryCounts(latestSession.id);
+          setLatestSessionCounts(latestCounts);
+        } catch (error) {
+          console.error('Error loading latest session counts:', error);
+          setLatestSessionCounts([]);
+        }
+      } else {
+        setLatestSessionCounts([]);
+      }
+      
       if (termsData.length > 0) {
         setSelectedTerm(termsData[0].id);
       }
@@ -41,8 +89,23 @@ function ReportsPageContent() {
     }
   }
 
-  // Get latest count for each item
-  const getLatestCount = (itemId: string): number => {
+  // Get latest count for each item with session/term info
+  // Prioritizes latest session counts (real-time) over historical counts
+  const getLatestCount = (itemId: string): { count: number; sessionName?: string; termName?: string; date?: Date } => {
+    // First, check if there's a count in the latest session (most recent, even if incomplete)
+    const latestSessionCount = latestSessionCounts.find(c => c.itemId === itemId);
+    if (latestSessionCount && sessions.length > 0) {
+      const session = sessions.find(s => s.id === latestSessionCount.sessionId);
+      const term = session?.academicTermId ? terms.find(t => t.id === session.academicTermId) : null;
+      return {
+        count: latestSessionCount.countedQuantity,
+        sessionName: session?.name,
+        termName: term?.name || (term ? `${term.term} ${term.year}` : undefined),
+        date: latestSessionCount.countedAt?.toDate?.()
+      };
+    }
+    
+    // Fallback to historical counts if no active session count exists
     const itemCounts = historicalCounts
       .filter((hc) => hc.itemId === itemId)
       .sort((a, b) => {
@@ -53,22 +116,67 @@ function ReportsPageContent() {
         const termOrder = { SPRING: 1, SUMMER: 2, FALL: 3, WINTER: 4 };
         return termOrder[termB.term] - termOrder[termA.term];
       });
-    return itemCounts[0]?.countedQuantity || 0;
+    
+    const latestHistorical = itemCounts[0];
+    if (latestHistorical) {
+      const term = terms.find(t => t.id === latestHistorical.academicTermId);
+      // Find which session this count came from (if any)
+      const relatedSession = sessions.find(s => s.academicTermId === latestHistorical.academicTermId);
+      return {
+        count: latestHistorical.countedQuantity,
+        sessionName: relatedSession?.name,
+        termName: term?.name || (term ? `${term.term} ${term.year}` : undefined),
+        date: latestHistorical.importedAt?.toDate?.()
+      };
+    }
+    
+    return { count: 0 };
   };
 
-  // Get previous count for comparison
-  const getPreviousCount = (itemId: string): number => {
-    const itemCounts = historicalCounts
-      .filter((hc) => hc.itemId === itemId)
-      .sort((a, b) => {
-        const termA = terms.find((t) => t.id === a.academicTermId);
-        const termB = terms.find((t) => t.id === b.academicTermId);
-        if (!termA || !termB) return 0;
-        if (termA.year !== termB.year) return termB.year - termA.year;
-        const termOrder = { SPRING: 1, SUMMER: 2, FALL: 3, WINTER: 4 };
-        return termOrder[termB.term] - termOrder[termA.term];
+  // Get previous count for comparison with session/term info
+  const getPreviousCount = (itemId: string): { count: number; sessionName?: string; termName?: string; date?: Date } => {
+    // Build combined list of counts from both latest session and historical
+    const allCounts: Array<{ count: number; sessionName?: string; termName?: string; date?: Date; timestamp: number }> = [];
+    
+    // Add latest session count if exists
+    const latestSessionCount = latestSessionCounts.find(c => c.itemId === itemId);
+    if (latestSessionCount && sessions.length > 0) {
+      const session = sessions.find(s => s.id === latestSessionCount.sessionId);
+      const term = session?.academicTermId ? terms.find(t => t.id === session.academicTermId) : null;
+      allCounts.push({
+        count: latestSessionCount.countedQuantity,
+        sessionName: session?.name,
+        termName: term?.name || (term ? `${term.term} ${term.year}` : undefined),
+        date: latestSessionCount.countedAt?.toDate?.(),
+        timestamp: latestSessionCount.countedAt?.toMillis?.() || 0
       });
-    return itemCounts[1]?.countedQuantity || 0;
+    }
+    
+    // Add historical counts
+    historicalCounts
+      .filter((hc) => hc.itemId === itemId)
+      .forEach((hc) => {
+        const term = terms.find(t => t.id === hc.academicTermId);
+        const relatedSession = sessions.find(s => s.academicTermId === hc.academicTermId);
+        allCounts.push({
+          count: hc.countedQuantity,
+          sessionName: relatedSession?.name,
+          termName: term?.name || (term ? `${term.term} ${term.year}` : undefined),
+          date: hc.importedAt?.toDate?.(),
+          timestamp: hc.importedAt?.toMillis?.() || 0
+        });
+      });
+    
+    // Sort by timestamp (most recent first)
+    allCounts.sort((a, b) => b.timestamp - a.timestamp);
+    
+    // Return the second most recent (previous)
+    if (allCounts.length > 1) {
+      const { timestamp, ...prev } = allCounts[1];
+      return prev;
+    }
+    
+    return { count: 0 };
   };
 
   // Items with shortages (decreasing)
@@ -80,7 +188,7 @@ function ReportsPageContent() {
         item,
         latest,
         previous,
-        change: latest - previous,
+        change: latest.count - previous.count,
       };
     })
     .filter((data) => data.change < 0)
@@ -95,7 +203,7 @@ function ReportsPageContent() {
         item,
         latest,
         previous,
-        change: latest - previous,
+        change: latest.count - previous.count,
       };
     })
     .filter((data) => data.change > 0)
@@ -123,12 +231,30 @@ function ReportsPageContent() {
             </h1>
             <p className="text-sm text-slate-400">View inventory trends and analysis</p>
           </div>
-          <Link
-            href="/"
-            className="group rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50"
-          >
-            ← Back to Dashboard
-          </Link>
+          <div className="flex gap-3">
+            <button
+              onClick={loadData}
+              disabled={loading}
+              className="group rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              title="Refresh data"
+            >
+              <svg 
+                className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>{loading ? 'Refreshing...' : 'Refresh'}</span>
+            </button>
+            <Link
+              href="/"
+              className="group rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50"
+            >
+              ← Back to Dashboard
+            </Link>
+          </div>
         </header>
 
         {loading ? (
@@ -205,8 +331,22 @@ function ReportsPageContent() {
                             <tr key={item.id} className="hover:bg-slate-800/30">
                               <td className="px-4 py-3 text-sm font-medium text-slate-200">{item.name}</td>
                               <td className="px-4 py-3 text-sm text-slate-400">{category?.name || 'Unknown'}</td>
-                              <td className="px-4 py-3 text-sm text-slate-300">{previous}</td>
-                              <td className="px-4 py-3 text-sm text-slate-300">{latest}</td>
+                              <td className="px-4 py-3 text-sm text-slate-300">
+                                <div className="text-center">
+                                  <div>{previous.count}</div>
+                                  {previous.termName && (
+                                    <div className="text-xs text-slate-500">{previous.termName}</div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-300">
+                                <div className="text-center">
+                                  <div>{latest.count}</div>
+                                  {latest.termName && (
+                                    <div className="text-xs text-slate-500">{latest.termName}</div>
+                                  )}
+                                </div>
+                              </td>
                               <td className="px-4 py-3 text-sm font-medium text-red-400">{change}</td>
                             </tr>
                           );
@@ -246,8 +386,22 @@ function ReportsPageContent() {
                             <tr key={item.id} className="hover:bg-slate-800/30">
                               <td className="px-4 py-3 text-sm font-medium text-slate-200">{item.name}</td>
                               <td className="px-4 py-3 text-sm text-slate-400">{category?.name || 'Unknown'}</td>
-                              <td className="px-4 py-3 text-sm text-slate-300">{previous}</td>
-                              <td className="px-4 py-3 text-sm text-slate-300">{latest}</td>
+                              <td className="px-4 py-3 text-sm text-slate-300">
+                                <div className="text-center">
+                                  <div>{previous.count}</div>
+                                  {previous.termName && (
+                                    <div className="text-xs text-slate-500">{previous.termName}</div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-300">
+                                <div className="text-center">
+                                  <div>{latest.count}</div>
+                                  {latest.termName && (
+                                    <div className="text-xs text-slate-500">{latest.termName}</div>
+                                  )}
+                                </div>
+                              </td>
                               <td className="px-4 py-3 text-sm font-medium text-emerald-400">+{change}</td>
                             </tr>
                           );
