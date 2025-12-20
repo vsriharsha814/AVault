@@ -11,6 +11,7 @@ import {
   getAcademicTerms,
   getHistoricalCounts,
 } from '../lib/firestore';
+import { Timestamp } from 'firebase/firestore';
 import { getCurrentTerm, getTermDisplayName } from '../lib/terms';
 import type { Category, Item, InventorySession, InventoryCount, AcademicTerm, HistoricalCount } from '../types';
 import Link from 'next/link';
@@ -24,6 +25,7 @@ export default function Dashboard() {
   const [terms, setTerms] = useState<AcademicTerm[]>([]);
   const [historicalCounts, setHistoricalCounts] = useState<HistoricalCount[]>([]);
   const [latestSessionCounts, setLatestSessionCounts] = useState<InventoryCount[]>([]);
+  const [sessionLastUpdates, setSessionLastUpdates] = useState<Record<string, Timestamp>>({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -89,18 +91,65 @@ export default function Dashboard() {
         setLatestSessionCounts([]);
       }
       
+      // Load last update times for all sessions (most recent count timestamp)
+      // This shows when each session was last updated with new counts
+      const lastUpdatesMap: Record<string, Timestamp> = {};
+      await Promise.all(
+        sessionsData.map(async (session) => {
+          try {
+            const sessionCounts = await getInventoryCounts(session.id);
+            if (sessionCounts.length > 0) {
+              // Find the most recent countedAt timestamp
+              const mostRecent = sessionCounts.reduce((latest, count) => {
+                const countTime = count.countedAt?.toMillis?.() || 0;
+                const latestTime = latest?.countedAt?.toMillis?.() || 0;
+                return countTime > latestTime ? count : latest;
+              });
+              if (mostRecent?.countedAt) {
+                lastUpdatesMap[session.id] = mostRecent.countedAt;
+              }
+            }
+          } catch (error) {
+            // Silently fail for individual sessions - will fall back to session date
+            console.error(`Error loading counts for session ${session.id}:`, error);
+          }
+        })
+      );
+      setSessionLastUpdates(lastUpdatesMap);
+      
       // Debug logging
       if (process.env.NODE_ENV === 'development') {
+        // Find the most recent count to see what term it's associated with
+        const mostRecent = countsData.length > 0
+          ? countsData.reduce((latest, count) => {
+              const countTime = count.importedAt?.toMillis?.() || 0;
+              const latestTime = latest?.importedAt?.toMillis?.() || 0;
+              return countTime > latestTime ? count : latest;
+            })
+          : null;
+        
+        const mostRecentTerm = mostRecent
+          ? termsData.find(t => t.id === mostRecent.academicTermId)
+          : null;
+        
         console.log('📊 Data loaded:', {
           items: itemsData.length,
           categories: categoriesData.length,
           terms: termsData.length,
           historicalCounts: countsData.length,
+          mostRecentCount: mostRecent ? {
+            itemId: mostRecent.itemId,
+            academicTermId: mostRecent.academicTermId,
+            termName: mostRecentTerm?.name || 'NOT FOUND',
+            importedAt: mostRecent.importedAt?.toDate?.()?.toISOString(),
+            timestamp: mostRecent.importedAt?.toMillis?.()
+          } : null,
           termIds: termsData.map(t => ({ id: t.id, name: t.name })).slice(0, 5),
           sampleCounts: countsData.slice(0, 3).map(c => ({
             itemId: c.itemId,
             academicTermId: c.academicTermId,
-            quantity: c.countedQuantity
+            quantity: c.countedQuantity,
+            importedAt: c.importedAt?.toDate?.()?.toISOString()
           })),
           unmatchedTerms: countsData
             .map(c => c.academicTermId)
@@ -175,8 +224,63 @@ export default function Dashboard() {
   // Determine current term based on date (CU Boulder calendar)
   const currentTermInfo = getCurrentTerm();
 
-  // Latest academic term that exists in Firestore (represents last time inventory was updated)
-  const latestDbTerm = terms.length > 0 ? terms[0] : undefined;
+  // Find the term with the most recent count updates (not just the latest term by year)
+  // We check historicalCounts first since that's where all counts end up and has the most recent importedAt
+  const termWithMostRecentCounts = (() => {
+    // Find most recent historical count - this is the source of truth since all counts
+    // (from sessions or imports) end up in historicalCounts with updated importedAt timestamps
+    const mostRecentHistorical = historicalCounts.length > 0
+      ? historicalCounts.reduce((latest, count) => {
+          const countTime = count.importedAt?.toMillis?.() || 0;
+          const latestTime = latest?.importedAt?.toMillis?.() || 0;
+          return countTime > latestTime ? count : latest;
+        })
+      : null;
+    
+    if (process.env.NODE_ENV === 'development') {
+      if (mostRecentHistorical) {
+        const term = terms.find(t => t.id === mostRecentHistorical.academicTermId);
+        console.log('📊 Most recent historical count:', {
+          itemId: mostRecentHistorical.itemId,
+          academicTermId: mostRecentHistorical.academicTermId,
+          termName: term?.name || 'NOT FOUND',
+          importedAt: mostRecentHistorical.importedAt?.toDate?.()?.toISOString(),
+          timestamp: mostRecentHistorical.importedAt?.toMillis?.()
+        });
+      }
+    }
+    
+    // If we have a most recent historical count, use its term
+    if (mostRecentHistorical?.academicTermId) {
+      const term = terms.find(t => t.id === mostRecentHistorical.academicTermId);
+      if (term) {
+        return term;
+      }
+    }
+    
+    // Fallback: Check latest session counts if no historical counts exist yet
+    // (This handles the case where counts were just saved but historicalCounts hasn't refreshed)
+    const mostRecentSession = latestSessionCounts.length > 0
+      ? latestSessionCounts.reduce((latest, count) => {
+          const countTime = count.countedAt?.toMillis?.() || 0;
+          const latestTime = latest?.countedAt?.toMillis?.() || 0;
+          return countTime > latestTime ? count : latest;
+        })
+      : null;
+    
+    if (mostRecentSession) {
+      const session = sessions.find(s => s.id === mostRecentSession.sessionId);
+      if (session?.academicTermId) {
+        const term = terms.find(t => t.id === session.academicTermId);
+        if (term) {
+          return term;
+        }
+      }
+    }
+    
+    // Fallback to latest term by year if no counts exist
+    return terms.length > 0 ? terms[0] : undefined;
+  })();
   
   const latestSession = sessions[0]; // Most recent session
 
@@ -255,7 +359,11 @@ export default function Dashboard() {
 
         {/* Summary cards */}
         <section className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="group relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-3 sm:p-4 lg:p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/10">
+          <button
+            onClick={loadData}
+            disabled={loading}
+            className="group relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-3 sm:p-4 lg:p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-left"
+          >
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
             <div className="relative">
               <div className="mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
@@ -272,8 +380,11 @@ export default function Dashboard() {
                 {loading ? <span className="animate-pulse">...</span> : items.length.toLocaleString()}
             </p>
             </div>
-          </div>
-          <div className="group relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-3 sm:p-4 lg:p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/10">
+          </button>
+          <Link
+            href="/categories"
+            className="group relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-3 sm:p-4 lg:p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/10 cursor-pointer"
+          >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
             <div className="relative">
               <div className="mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
@@ -290,8 +401,11 @@ export default function Dashboard() {
                 {loading ? <span className="animate-pulse">...</span> : categories.length.toLocaleString()}
             </p>
             </div>
-          </div>
-          <div className="group relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-3 sm:p-4 lg:p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/10">
+          </Link>
+          <Link
+            href="/sessions"
+            className="group relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-3 sm:p-4 lg:p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/10 cursor-pointer"
+          >
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
             <div className="relative">
               <div className="mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
@@ -308,8 +422,11 @@ export default function Dashboard() {
                 {loading ? <span className="animate-pulse">...</span> : latestSession?.name || <span className="text-slate-500">No sessions yet</span>}
             </p>
             </div>
-          </div>
-          <div className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/10">
+          </Link>
+          <Link
+            href="/reports"
+            className="group relative overflow-hidden rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl p-6 shadow-xl shadow-slate-900/50 transition-all hover:scale-105 hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/10 cursor-pointer"
+          >
             <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
             <div className="relative">
               <div className="mb-2 sm:mb-3 flex items-center gap-2 sm:gap-3">
@@ -332,18 +449,18 @@ export default function Dashboard() {
               <p className="mt-1 text-[10px] sm:text-xs text-slate-400">
                 {loading ? (
                   <span className="animate-pulse">Checking last update…</span>
-                ) : latestDbTerm ? (
+                ) : termWithMostRecentCounts ? (
                   <>
                     Last updated:{' '}
-                    {latestDbTerm.name ||
-                      getTermDisplayName(latestDbTerm.term, latestDbTerm.year)}
+                    {termWithMostRecentCounts.name ||
+                      getTermDisplayName(termWithMostRecentCounts.term, termWithMostRecentCounts.year)}
                   </>
                 ) : (
                   'No academic terms found yet'
                 )}
               </p>
             </div>
-          </div>
+          </Link>
         </section>
 
         {/* Main content */}
@@ -540,7 +657,9 @@ export default function Dashboard() {
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-semibold text-slate-200 truncate">{session.name}</p>
                           <p className="text-xs text-slate-500 mt-0.5">
-                            {session.date?.toDate?.().toLocaleDateString() || 'No date'}
+                            {sessionLastUpdates[session.id] 
+                              ? `Updated ${sessionLastUpdates[session.id].toDate().toLocaleDateString()}`
+                              : session.date?.toDate?.().toLocaleDateString() || 'No date'}
                           </p>
                         </div>
                       </div>

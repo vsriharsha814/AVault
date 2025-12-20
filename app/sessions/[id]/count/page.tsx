@@ -126,20 +126,65 @@ function CountSessionPageContent() {
       
       // If session doesn't have academicTermId yet, create/find it from term snapshot
       if (!academicTermId && session.term && session.termYear) {
-        const termDoc = await findOrCreateAcademicTermByCode(
-          session.term,
-          session.termYear,
-          `${session.term} ${session.termYear}`
-        );
-        academicTermId = termDoc.id;
-        // Update session with the academic term ID
-        await updateInventorySession(sessionId, { academicTermId });
-        setSession({ ...session, academicTermId });
+        try {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('🔍 Creating/finding academic term:', {
+              term: session.term,
+              termYear: session.termYear,
+              sessionId
+            });
+          }
+          const termDoc = await findOrCreateAcademicTermByCode(
+            session.term,
+            session.termYear,
+            `${session.term} ${session.termYear}`
+          );
+          academicTermId = termDoc.id;
+          if (process.env.NODE_ENV === 'development') {
+            console.log('✅ Academic term found/created:', {
+              termId: academicTermId,
+              termName: termDoc.name
+            });
+          }
+          // Update session with the academic term ID
+          await updateInventorySession(sessionId, { academicTermId });
+          setSession({ ...session, academicTermId });
+        } catch (termError) {
+          console.error('Error finding/creating academic term:', termError);
+          setError('Failed to associate term with session. Count saved but term not linked.');
+          // Continue anyway - count is saved to inventoryCounts
+        }
       }
       
       // Save to historical counts if we have an academic term
       if (academicTermId) {
-        await createOrUpdateHistoricalCount(itemId, academicTermId, quantity);
+        try {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('💾 Saving to historical counts:', {
+              itemId,
+              academicTermId,
+              quantity
+            });
+          }
+          await createOrUpdateHistoricalCount(itemId, academicTermId, quantity);
+          if (process.env.NODE_ENV === 'development') {
+            console.log('✅ Historical count saved successfully');
+          }
+        } catch (historicalError) {
+          console.error('Error saving to historical counts:', historicalError);
+          // Don't fail the whole operation - count is saved to inventoryCounts
+          // But show a warning that dashboard might not update immediately
+          setError('Count saved but failed to update historical records. Dashboard may not reflect changes immediately.');
+        }
+      } else {
+        // This shouldn't happen if session was created properly, but handle it gracefully
+        console.warn('⚠️ Session has no academicTermId and term snapshot. Count saved to session only.', {
+          sessionId,
+          hasTerm: !!session.term,
+          hasTermYear: !!session.termYear,
+          hasAcademicTermId: !!session.academicTermId
+        });
+        setError('Count saved to session, but term not linked. Please complete the session to link the term.');
       }
       
       // Reload counts to get updated data from database
