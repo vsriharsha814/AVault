@@ -106,15 +106,28 @@ function ReportsPageContent() {
     }
     
     // Fallback to historical counts if no active session count exists
+    // Sort by year first (newer years = higher priority), then by timestamp within the same year
     const itemCounts = historicalCounts
       .filter((hc) => hc.itemId === itemId)
       .sort((a, b) => {
         const termA = terms.find((t) => t.id === a.academicTermId);
         const termB = terms.find((t) => t.id === b.academicTermId);
-        if (!termA || !termB) return 0;
-        if (termA.year !== termB.year) return termB.year - termA.year;
-        const termOrder = { SPRING: 1, SUMMER: 2, FALL: 3, WINTER: 4 };
-        return termOrder[termB.term] - termOrder[termA.term];
+        
+        // If terms are found, prioritize by year first
+        if (termA && termB) {
+          if (termA.year !== termB.year) {
+            return termB.year - termA.year; // Newer year first
+          }
+          // Same year: sort by timestamp (most recent first)
+          const timestampA = a.importedAt?.toMillis?.() || 0;
+          const timestampB = b.importedAt?.toMillis?.() || 0;
+          return timestampB - timestampA;
+        }
+        
+        // Fallback: if terms not found, sort by timestamp
+        const timestampA = a.importedAt?.toMillis?.() || 0;
+        const timestampB = b.importedAt?.toMillis?.() || 0;
+        return timestampB - timestampA;
       });
     
     const latestHistorical = itemCounts[0];
@@ -136,7 +149,7 @@ function ReportsPageContent() {
   // Get previous count for comparison with session/term info
   const getPreviousCount = (itemId: string): { count: number; sessionName?: string; termName?: string; date?: Date } => {
     // Build combined list of counts from both latest session and historical
-    const allCounts: Array<{ count: number; sessionName?: string; termName?: string; date?: Date; timestamp: number }> = [];
+    const allCounts: Array<{ count: number; sessionName?: string; termName?: string; date?: Date; year: number; timestamp: number }> = [];
     
     // Add latest session count if exists
     const latestSessionCount = latestSessionCounts.find(c => c.itemId === itemId);
@@ -148,6 +161,7 @@ function ReportsPageContent() {
         sessionName: session?.name,
         termName: term?.name || (term ? `${term.term} ${term.year}` : undefined),
         date: latestSessionCount.countedAt?.toDate?.(),
+        year: term?.year || 0,
         timestamp: latestSessionCount.countedAt?.toMillis?.() || 0
       });
     }
@@ -163,17 +177,28 @@ function ReportsPageContent() {
           sessionName: relatedSession?.name,
           termName: term?.name || (term ? `${term.term} ${term.year}` : undefined),
           date: hc.importedAt?.toDate?.(),
+          year: term?.year || 0,
           timestamp: hc.importedAt?.toMillis?.() || 0
         });
       });
     
-    // Sort by timestamp (most recent first)
-    allCounts.sort((a, b) => b.timestamp - a.timestamp);
+    // Sort by year first (newer years = higher priority), then by timestamp within the same year
+    allCounts.sort((a, b) => {
+      if (a.year !== b.year) {
+        return b.year - a.year; // Newer year first
+      }
+      return b.timestamp - a.timestamp; // Most recent timestamp first within same year
+    });
     
     // Return the second most recent (previous)
     if (allCounts.length > 1) {
-      const { timestamp, ...prev } = allCounts[1];
-      return prev;
+      const secondCount = allCounts[1];
+      return {
+        count: secondCount.count,
+        sessionName: secondCount.sessionName,
+        termName: secondCount.termName,
+        date: secondCount.date
+      };
     }
     
     return { count: 0 };
