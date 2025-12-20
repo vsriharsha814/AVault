@@ -448,7 +448,7 @@ export default function Dashboard() {
                   <span className="sm:hidden">Sessions</span>
                 </h2>
                 <Link
-                  href="/sessions/new"
+                  href="/sessions"
                   className="text-xs sm:text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
                 >
                   View all →
