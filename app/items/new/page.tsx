@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getCategories, createItem } from '../../lib/firestore';
 import type { Category } from '../../types';
 import Link from 'next/link';
@@ -9,6 +9,7 @@ import AuthGuard from '../../components/AuthGuard';
 
 function AddItemPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -16,7 +17,7 @@ function AddItemPageContent() {
 
   const [formData, setFormData] = useState({
     name: '',
-    categoryId: '',
+    categoryId: searchParams?.get('categoryId') || '',
     location: '',
     condition: '',
     serialFrequency: '',
@@ -25,6 +26,13 @@ function AddItemPageContent() {
   useEffect(() => {
     loadCategories();
   }, []);
+
+  useEffect(() => {
+    // Update categoryId if it's provided in URL params
+    if (searchParams?.get('categoryId')) {
+      setFormData(prev => ({ ...prev, categoryId: searchParams.get('categoryId') || '' }));
+    }
+  }, [searchParams]);
 
   async function loadCategories() {
     try {
@@ -56,7 +64,9 @@ function AddItemPageContent() {
         condition: formData.condition || undefined,
         serialFrequency: formData.serialFrequency || undefined,
       });
-      router.push('/');
+      // Redirect to returnTo URL if provided, otherwise go to dashboard
+      const returnTo = searchParams?.get('returnTo') || '/';
+      router.push(returnTo);
     } catch (err: any) {
       setError(err.message || 'Failed to create item');
     } finally {

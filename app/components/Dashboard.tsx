@@ -7,11 +7,12 @@ import {
   getCategories,
   getItems,
   getInventorySessions,
+  getInventoryCounts,
   getAcademicTerms,
   getHistoricalCounts,
 } from '../lib/firestore';
 import { getCurrentTerm, getTermDisplayName } from '../lib/terms';
-import type { Category, Item, InventorySession, AcademicTerm, HistoricalCount } from '../types';
+import type { Category, Item, InventorySession, InventoryCount, AcademicTerm, HistoricalCount } from '../types';
 import Link from 'next/link';
 
 export default function Dashboard() {
@@ -22,6 +23,7 @@ export default function Dashboard() {
   const [sessions, setSessions] = useState<InventorySession[]>([]);
   const [terms, setTerms] = useState<AcademicTerm[]>([]);
   const [historicalCounts, setHistoricalCounts] = useState<HistoricalCount[]>([]);
+  const [latestSessionCounts, setLatestSessionCounts] = useState<InventoryCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -48,6 +50,21 @@ export default function Dashboard() {
       setSessions(sessionsData);
       setTerms(termsData);
       setHistoricalCounts(countsData);
+      
+      // Also load counts from the latest session (even if incomplete) to show most recent counts
+      // This ensures counts show immediately even before session is marked complete
+      if (sessionsData.length > 0) {
+        const latestSession = sessionsData[0];
+        try {
+          const latestCounts = await getInventoryCounts(latestSession.id);
+          setLatestSessionCounts(latestCounts);
+        } catch (error) {
+          console.error('Error loading latest session counts:', error);
+          setLatestSessionCounts([]);
+        }
+      } else {
+        setLatestSessionCounts([]);
+      }
       
       // Debug logging
       if (process.env.NODE_ENV === 'development') {
@@ -78,6 +95,13 @@ export default function Dashboard() {
 
   // Get latest count for an item
   const getLatestCount = (itemId: string): number => {
+    // First, check if there's a count in the latest session (most recent, even if incomplete)
+    const latestSessionCount = latestSessionCounts.find((ic) => ic.itemId === itemId);
+    if (latestSessionCount) {
+      return latestSessionCount.countedQuantity || 0;
+    }
+    
+    // Otherwise, check historical counts
     const itemCounts = historicalCounts.filter((hc) => hc.itemId === itemId);
     
     if (itemCounts.length === 0) {

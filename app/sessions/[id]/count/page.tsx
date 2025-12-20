@@ -35,12 +35,25 @@ function CountSessionPageContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [savingItemId, setSavingItemId] = useState<string | null>(null);
+  const [completingSession, setCompletingSession] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [itemCounts, setItemCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (sessionId) {
       loadData();
     }
+  }, [sessionId]);
+
+  // Reload data when page becomes visible (e.g., returning from add item/category)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && sessionId) {
+        loadData();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [sessionId]);
 
   async function loadData() {
@@ -111,9 +124,16 @@ function CountSessionPageContent() {
   }
 
   async function handleCompleteSession() {
-    if (!session || !confirm('Mark this session as complete? You can still edit counts later.')) {
+    if (!session || completingSession) {
       return;
     }
+
+    if (!confirm('Mark this session as complete? You can still edit counts later.')) {
+      return;
+    }
+
+    setCompletingSession(true);
+    setError('');
 
     try {
       let academicTermId = session.academicTermId;
@@ -140,6 +160,8 @@ function CountSessionPageContent() {
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to complete session');
+    } finally {
+      setCompletingSession(false);
     }
   }
 
@@ -208,6 +230,17 @@ function CountSessionPageContent() {
           </div>
           <div className="flex flex-wrap gap-2 sm:gap-3">
             <Link
+              href={`/categories?returnTo=/sessions/${sessionId}/count`}
+              className="group rounded-lg sm:rounded-xl border border-blue-500/30 bg-blue-500/10 backdrop-blur-sm px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-400 transition-all hover:border-blue-500/50 hover:bg-blue-500/20 flex items-center gap-1.5"
+              title="Add new category"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="hidden sm:inline">Add Category</span>
+              <span className="sm:hidden">Category</span>
+            </Link>
+            <Link
               href="/"
               className="group rounded-lg sm:rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50"
             >
@@ -216,15 +249,43 @@ function CountSessionPageContent() {
             {session && !session.isComplete && (
               <button
                 onClick={handleCompleteSession}
-                className="rounded-lg sm:rounded-xl bg-emerald-500 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/40"
+                disabled={completingSession}
+                className="rounded-lg sm:rounded-xl bg-emerald-500 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center gap-2"
               >
-                Mark Complete
+                {completingSession ? (
+                  <>
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    <span>Completing...</span>
+                  </>
+                ) : (
+                  'Mark Complete'
+                )}
               </button>
             )}
             {session?.isComplete && (
-              <span className="rounded-lg sm:rounded-xl bg-emerald-500/20 border border-emerald-500/30 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-emerald-400">
-                ✓ Complete
-              </span>
+              <>
+                {!isEditMode ? (
+                  <button
+                    onClick={() => setIsEditMode(true)}
+                    className="rounded-lg sm:rounded-xl bg-blue-500/20 border border-blue-500/30 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit Counts
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setIsEditMode(false)}
+                    className="rounded-lg sm:rounded-xl bg-slate-700/50 border border-slate-600/50 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-slate-300 hover:bg-slate-700/70 transition-colors"
+                  >
+                    Done Editing
+                  </button>
+                )}
+                <span className="rounded-lg sm:rounded-xl bg-emerald-500/20 border border-emerald-500/30 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-emerald-400">
+                  ✓ Complete
+                </span>
+              </>
             )}
           </div>
         </header>
@@ -286,12 +347,25 @@ function CountSessionPageContent() {
           {Object.entries(itemsByCategory).map(([categoryName, categoryItems]) => (
             <div key={categoryName} className="rounded-xl sm:rounded-2xl border border-slate-800/50 bg-gradient-to-br from-slate-900/80 to-slate-800/40 backdrop-blur-xl overflow-hidden shadow-xl shadow-slate-900/50">
               <div className="bg-slate-800/30 backdrop-blur-sm px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800/50">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-100 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                  </svg>
-                  {categoryName}
-                </h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-100 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    {categoryName}
+                  </h2>
+                  <Link
+                    href={`/items/new?categoryId=${categories.find(c => c.name === categoryName)?.id || ''}&returnTo=/sessions/${sessionId}/count`}
+                    className="group flex items-center gap-1.5 rounded-lg border border-blue-500/30 bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-400 transition-all hover:border-blue-500/50 hover:bg-blue-500/20"
+                    title={`Add item to ${categoryName}`}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span className="hidden sm:inline">Add Item</span>
+                    <span className="sm:hidden">+</span>
+                  </Link>
+                </div>
               </div>
               <div className="p-4 sm:p-6 space-y-3">
                 {categoryItems.map((item) => {
@@ -327,45 +401,57 @@ function CountSessionPageContent() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <div className="flex items-center gap-2">
-                          <label htmlFor={`count-${item.id}`} className="text-xs sm:text-sm text-slate-400 whitespace-nowrap">
-                            Count:
-                          </label>
-                          <input
-                            id={`count-${item.id}`}
-                            type="number"
-                            min="0"
-                            step="1"
-                            value={currentCount || ''}
-                            onChange={(e) => {
-                              const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
-                              setItemCounts(prev => ({ ...prev, [item.id]: value }));
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                handleSaveCount(item.id, itemCounts[item.id] || 0);
-                              }
-                            }}
-                            className="w-20 sm:w-24 rounded-lg border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-2 sm:px-3 py-1.5 sm:py-2 text-sm text-slate-100 transition-all focus:border-emerald-500/50 focus:bg-slate-800/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                            placeholder="0"
-                          />
-                        </div>
-                        <button
-                          onClick={() => handleSaveCount(item.id, itemCounts[item.id] || 0)}
-                          disabled={isSaving}
-                          className="rounded-lg sm:rounded-xl bg-emerald-500 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/40 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                        >
-                          {isSaving ? (
-                            <span className="flex items-center gap-1.5">
-                              <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                              Saving...
+                        {session?.isComplete && !isEditMode ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs sm:text-sm text-slate-400 whitespace-nowrap">Count:</span>
+                            <span className="w-20 sm:w-24 rounded-lg border border-slate-700/50 bg-slate-800/30 backdrop-blur-sm px-2 sm:px-3 py-1.5 sm:py-2 text-sm text-slate-300 text-center">
+                              {currentCount}
                             </span>
-                          ) : currentCount > 0 ? (
-                            'Update'
-                          ) : (
-                            'Save'
-                          )}
-                        </button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <label htmlFor={`count-${item.id}`} className="text-xs sm:text-sm text-slate-400 whitespace-nowrap">
+                                Count:
+                              </label>
+                              <input
+                                id={`count-${item.id}`}
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={currentCount || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
+                                  setItemCounts(prev => ({ ...prev, [item.id]: value }));
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleSaveCount(item.id, itemCounts[item.id] || 0);
+                                  }
+                                }}
+                                disabled={session?.isComplete && !isEditMode}
+                                className="w-20 sm:w-24 rounded-lg border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-2 sm:px-3 py-1.5 sm:py-2 text-sm text-slate-100 transition-all focus:border-emerald-500/50 focus:bg-slate-800/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                placeholder="0"
+                              />
+                            </div>
+                            <button
+                              onClick={() => handleSaveCount(item.id, itemCounts[item.id] || 0)}
+                              disabled={isSaving || (session?.isComplete && !isEditMode)}
+                              className="rounded-lg sm:rounded-xl bg-emerald-500 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/40 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                            >
+                              {isSaving ? (
+                                <span className="flex items-center gap-1.5">
+                                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                  Saving...
+                                </span>
+                              ) : currentCount > 0 ? (
+                                'Update'
+                              ) : (
+                                'Save'
+                              )}
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   );

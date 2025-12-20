@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getCategories, createCategory, updateCategory, deleteCategory, getItems, updateItemsCategory } from '../lib/firestore';
 import type { Category, Item } from '../types';
 import Link from 'next/link';
 import AuthGuard from '../components/AuthGuard';
 
 function CategoriesPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -59,6 +62,12 @@ function CategoriesPageContent() {
       setNewCategoryName('');
       setShowAddForm(false);
       await loadCategories();
+      
+      // Redirect to returnTo URL if provided
+      const returnTo = searchParams?.get('returnTo');
+      if (returnTo) {
+        router.push(returnTo);
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create category');
     } finally {
