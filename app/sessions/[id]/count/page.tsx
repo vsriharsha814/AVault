@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../../../lib/firebase';
@@ -13,6 +13,7 @@ import {
   updateInventorySession,
   findOrCreateAcademicTermByCode,
   syncHistoricalCountsFromSession,
+  createOrUpdateHistoricalCount,
 } from '../../../lib/firestore';
 import type { InventorySession, Item, Category, InventoryCount } from '../../../types';
 import Link from 'next/link';
@@ -56,6 +57,18 @@ function CountSessionPageContent() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [sessionId]);
 
+  // Create a memoized map of saved quantities - this only updates when counts changes
+  // This ensures savedQuantity is only calculated from the database state, never from user input
+  const savedQuantitiesMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    counts.forEach((count) => {
+      if (count.itemId && typeof count.countedQuantity === 'number' && count.countedQuantity > 0) {
+        map[count.itemId] = count.countedQuantity;
+      }
+    });
+    return map;
+  }, [counts]);
+
   async function loadData() {
     try {
       setLoading(true);
@@ -76,7 +89,9 @@ function CountSessionPageContent() {
       setCategories(categoriesData);
       setCounts(countsData);
 
-      // Initialize item counts from existing counts
+      // Initialize item counts from existing saved counts
+      // This sets the input field values to match what's saved in the database
+      // itemCounts is used for the input field value, but saved counts come from counts state
       const countsMap: Record<string, number> = {};
       countsData.forEach((count) => {
         countsMap[count.itemId] = count.countedQuantity;
@@ -102,15 +117,39 @@ function CountSessionPageContent() {
     setError('');
 
     try {
-      // This function handles both create and update - if count exists, it updates; otherwise creates
+      // Save to inventoryCounts (for session tracking)
       await createOrUpdateInventoryCount(itemId, sessionId, quantity, user?.uid);
       
-      // Update local state immediately for better UX
-      setItemCounts(prev => ({ ...prev, [itemId]: quantity }));
+      // Also save directly to historicalCounts if session has an academic term
+      // This ensures dashboard shows updates immediately
+      let academicTermId = session.academicTermId;
       
-      // Reload counts to get updated data
+      // If session doesn't have academicTermId yet, create/find it from term snapshot
+      if (!academicTermId && session.term && session.termYear) {
+        const termDoc = await findOrCreateAcademicTermByCode(
+          session.term,
+          session.termYear,
+          `${session.term} ${session.termYear}`
+        );
+        academicTermId = termDoc.id;
+        // Update session with the academic term ID
+        await updateInventorySession(sessionId, { academicTermId });
+        setSession({ ...session, academicTermId });
+      }
+      
+      // Save to historical counts if we have an academic term
+      if (academicTermId) {
+        await createOrUpdateHistoricalCount(itemId, academicTermId, quantity);
+      }
+      
+      // Reload counts to get updated data from database
+      // This ensures counts state (which determines savedQuantity) is always in sync with database
       const updatedCounts = await getInventoryCounts(sessionId);
       setCounts(updatedCounts);
+      
+      // Update local input state to match what was saved (so input shows saved value)
+      // This ensures input field shows the saved value after save
+      setItemCounts(prev => ({ ...prev, [itemId]: quantity }));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save count');
       // Revert local state on error
@@ -369,7 +408,17 @@ function CountSessionPageContent() {
               </div>
               <div className="p-4 sm:p-6 space-y-3">
                 {categoryItems.map((item) => {
-                  const currentCount = itemCounts[item.id] || 0;
+                  // Get the actual saved count from the memoized map
+                  // This ensures savedQuantity ONLY comes from the database (counts state)
+                  // and never changes when user types (itemCounts changes)
+                  const savedQuantity = savedQuantitiesMap[item.id] || 0;
+                  
+                  // Get the current input value
+                  // itemCounts tracks what user is typing (may be unsaved)
+                  // If itemCounts has a value, use it; otherwise show saved value or empty
+                  const currentInputValue = itemCounts[item.id] !== undefined 
+                    ? itemCounts[item.id] 
+                    : (savedQuantity > 0 ? savedQuantity : '');
                   const isSaving = savingItemId === item.id;
                   
                   return (
@@ -380,9 +429,9 @@ function CountSessionPageContent() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="text-sm sm:text-base font-semibold text-slate-200 truncate">{item.name}</h3>
-                          {currentCount > 0 && (
+                          {savedQuantity > 0 && (
                             <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-emerald-400 border border-emerald-500/30">
-                              Saved: {currentCount}
+                              Saved: {savedQuantity}
                             </span>
                           )}
                         </div>
@@ -405,7 +454,7 @@ function CountSessionPageContent() {
                           <div className="flex items-center gap-2">
                             <span className="text-xs sm:text-sm text-slate-400 whitespace-nowrap">Count:</span>
                             <span className="w-20 sm:w-24 rounded-lg border border-slate-700/50 bg-slate-800/30 backdrop-blur-sm px-2 sm:px-3 py-1.5 sm:py-2 text-sm text-slate-300 text-center">
-                              {currentCount}
+                              {savedQuantity}
                             </span>
                           </div>
                         ) : (
@@ -419,7 +468,7 @@ function CountSessionPageContent() {
                                 type="number"
                                 min="0"
                                 step="1"
-                                value={currentCount || ''}
+                                value={currentInputValue || ''}
                                 onChange={(e) => {
                                   const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
                                   setItemCounts(prev => ({ ...prev, [item.id]: value }));
@@ -435,7 +484,7 @@ function CountSessionPageContent() {
                               />
                             </div>
                             <button
-                              onClick={() => handleSaveCount(item.id, itemCounts[item.id] || 0)}
+                              onClick={() => handleSaveCount(item.id, itemCounts[item.id] !== undefined ? itemCounts[item.id] : 0)}
                               disabled={isSaving || (session?.isComplete && !isEditMode)}
                               className="rounded-lg sm:rounded-xl bg-emerald-500 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/40 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                             >
@@ -444,7 +493,7 @@ function CountSessionPageContent() {
                                   <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                                   Saving...
                                 </span>
-                              ) : currentCount > 0 ? (
+                              ) : savedQuantity > 0 ? (
                                 'Update'
                               ) : (
                                 'Save'

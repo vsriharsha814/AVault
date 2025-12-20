@@ -35,6 +35,29 @@ export default function Dashboard() {
     }
   }, [user]);
 
+  // Auto-refresh when page becomes visible or window regains focus (e.g., returning from a session)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && user) {
+        loadData();
+      }
+    };
+    
+    const handleFocus = () => {
+      if (user) {
+        loadData();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [user]);
+
   async function loadData() {
     try {
       setLoading(true);
@@ -193,6 +216,22 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2 sm:gap-3">
+            <button
+              onClick={loadData}
+              disabled={loading}
+              className="group relative rounded-lg sm:rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+              title="Refresh data"
+            >
+              <svg 
+                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${loading ? 'animate-spin' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span className="hidden sm:inline">{loading ? 'Refreshing...' : 'Refresh'}</span>
+            </button>
             <button
               onClick={() => signOutAndClearCache(auth)}
               className="group relative rounded-lg sm:rounded-xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-200 transition-all hover:border-slate-600 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/50"
