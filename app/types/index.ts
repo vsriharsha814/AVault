@@ -36,6 +36,7 @@ export interface HistoricalCount {
   countedQuantity: number;
   importedAt: Timestamp;
   sessionId?: string; // Track which session created this historical count
+  countedByUid?: string; // Track who counted this item
   notes?: string;
 }
 

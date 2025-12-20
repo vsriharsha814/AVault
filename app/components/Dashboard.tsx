@@ -13,7 +13,7 @@ import {
 } from '../lib/firestore';
 import { Timestamp } from 'firebase/firestore';
 import { getCurrentTerm, getTermDisplayName } from '../lib/terms';
-import type { Category, Item, InventorySession, InventoryCount, AcademicTerm, HistoricalCount } from '../types';
+import type { Category, Item, InventorySession, AcademicTerm, HistoricalCount } from '../types';
 import Link from 'next/link';
 
 export default function Dashboard() {
@@ -24,7 +24,7 @@ export default function Dashboard() {
   const [sessions, setSessions] = useState<InventorySession[]>([]);
   const [terms, setTerms] = useState<AcademicTerm[]>([]);
   const [historicalCounts, setHistoricalCounts] = useState<HistoricalCount[]>([]);
-  const [latestSessionCounts, setLatestSessionCounts] = useState<InventoryCount[]>([]);
+  const [latestSessionCounts, setLatestSessionCounts] = useState<HistoricalCount[]>([]);
   const [sessionLastUpdates, setSessionLastUpdates] = useState<Record<string, Timestamp>>({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,19 +96,19 @@ export default function Dashboard() {
       const lastUpdatesMap: Record<string, Timestamp> = {};
       await Promise.all(
         sessionsData.map(async (session) => {
-          try {
-            const sessionCounts = await getInventoryCounts(session.id);
-            if (sessionCounts.length > 0) {
-              // Find the most recent countedAt timestamp
-              const mostRecent = sessionCounts.reduce((latest, count) => {
-                const countTime = count.countedAt?.toMillis?.() || 0;
-                const latestTime = latest?.countedAt?.toMillis?.() || 0;
-                return countTime > latestTime ? count : latest;
-              });
-              if (mostRecent?.countedAt) {
-                lastUpdatesMap[session.id] = mostRecent.countedAt;
+            try {
+              const sessionCounts = await getInventoryCounts(session.id);
+              if (sessionCounts.length > 0) {
+                // Find the most recent importedAt timestamp
+                const mostRecent = sessionCounts.reduce((latest, count) => {
+                  const countTime = count.importedAt?.toMillis?.() || 0;
+                  const latestTime = latest?.importedAt?.toMillis?.() || 0;
+                  return countTime > latestTime ? count : latest;
+                });
+                if (mostRecent?.importedAt) {
+                  lastUpdatesMap[session.id] = mostRecent.importedAt;
+                }
               }
-            }
           } catch (error) {
             // Silently fail for individual sessions - will fall back to session date
             console.error(`Error loading counts for session ${session.id}:`, error);
@@ -168,7 +168,7 @@ export default function Dashboard() {
   // Get latest count for an item
   const getLatestCount = (itemId: string): number => {
     // First, check if there's a count in the latest session (most recent, even if incomplete)
-    const latestSessionCount = latestSessionCounts.find((ic) => ic.itemId === itemId);
+    const latestSessionCount = latestSessionCounts.find((hc) => hc.itemId === itemId);
     if (latestSessionCount) {
       return latestSessionCount.countedQuantity || 0;
     }
@@ -262,8 +262,8 @@ export default function Dashboard() {
     // (This handles the case where counts were just saved but historicalCounts hasn't refreshed)
     const mostRecentSession = latestSessionCounts.length > 0
       ? latestSessionCounts.reduce((latest, count) => {
-          const countTime = count.countedAt?.toMillis?.() || 0;
-          const latestTime = latest?.countedAt?.toMillis?.() || 0;
+          const countTime = count.importedAt?.toMillis?.() || 0;
+          const latestTime = latest?.importedAt?.toMillis?.() || 0;
           return countTime > latestTime ? count : latest;
         })
       : null;

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../lib/firebase';
 import { getItems, getCategories, getAcademicTerms, getHistoricalCounts, getInventorySessions, getInventoryCounts } from '../lib/firestore';
-import type { Item, Category, AcademicTerm, HistoricalCount, InventorySession, InventoryCount } from '../types';
+import type { Item, Category, AcademicTerm, HistoricalCount, InventorySession } from '../types';
 import Link from 'next/link';
 import AuthGuard from '../components/AuthGuard';
 
@@ -15,7 +15,7 @@ function ReportsPageContent() {
   const [terms, setTerms] = useState<AcademicTerm[]>([]);
   const [historicalCounts, setHistoricalCounts] = useState<HistoricalCount[]>([]);
   const [sessions, setSessions] = useState<InventorySession[]>([]);
-  const [latestSessionCounts, setLatestSessionCounts] = useState<InventoryCount[]>([]);
+  const [latestSessionCounts, setLatestSessionCounts] = useState<HistoricalCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTerm, setSelectedTerm] = useState<string>('');
 
@@ -101,7 +101,7 @@ function ReportsPageContent() {
         count: latestSessionCount.countedQuantity,
         sessionName: session?.name,
         termName: term?.name || (term ? `${term.term} ${term.year}` : undefined),
-        date: latestSessionCount.countedAt?.toDate?.()
+        date: latestSessionCount.importedAt?.toDate?.()
       };
     }
     
@@ -160,9 +160,9 @@ function ReportsPageContent() {
         count: latestSessionCount.countedQuantity,
         sessionName: session?.name,
         termName: term?.name || (term ? `${term.term} ${term.year}` : undefined),
-        date: latestSessionCount.countedAt?.toDate?.(),
+        date: latestSessionCount.importedAt?.toDate?.(),
         year: term?.year || 0,
-        timestamp: latestSessionCount.countedAt?.toMillis?.() || 0
+        timestamp: latestSessionCount.importedAt?.toMillis?.() || 0
       });
     }
     

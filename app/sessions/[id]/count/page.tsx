@@ -12,10 +12,9 @@ import {
   createOrUpdateInventoryCount,
   updateInventorySession,
   findOrCreateAcademicTermByCode,
-  syncHistoricalCountsFromSession,
   createOrUpdateHistoricalCount,
 } from '../../../lib/firestore';
-import type { InventorySession, Item, Category, InventoryCount } from '../../../types';
+import type { InventorySession, Item, Category, HistoricalCount } from '../../../types';
 import Link from 'next/link';
 import AuthGuard from '../../../components/AuthGuard';
 
@@ -30,7 +29,7 @@ function CountSessionPageContent() {
   const [session, setSession] = useState<InventorySession | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [counts, setCounts] = useState<InventoryCount[]>([]);
+  const [counts, setCounts] = useState<HistoricalCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -117,11 +116,7 @@ function CountSessionPageContent() {
     setError('');
 
     try {
-      // Save to inventoryCounts (for session tracking)
-      await createOrUpdateInventoryCount(itemId, sessionId, quantity, user?.uid);
-      
-      // Also save directly to historicalCounts if session has an academic term
-      // This ensures dashboard shows updates immediately
+      // Ensure session has an academic term before saving
       let academicTermId = session.academicTermId;
       
       // If session doesn't have academicTermId yet, create/find it from term snapshot
@@ -151,40 +146,30 @@ function CountSessionPageContent() {
           setSession({ ...session, academicTermId });
         } catch (termError) {
           console.error('Error finding/creating academic term:', termError);
-          setError('Failed to associate term with session. Count saved but term not linked.');
-          // Continue anyway - count is saved to inventoryCounts
+          setError('Failed to associate term with session. Count cannot be saved without a term.');
+          return;
         }
       }
       
-      // Save to historical counts if we have an academic term
-      if (academicTermId) {
-        try {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('💾 Saving to historical counts:', {
-              itemId,
-              academicTermId,
-              quantity
-            });
-          }
-          await createOrUpdateHistoricalCount(itemId, academicTermId, quantity, sessionId);
-          if (process.env.NODE_ENV === 'development') {
-            console.log('✅ Historical count saved successfully');
-          }
-        } catch (historicalError) {
-          console.error('Error saving to historical counts:', historicalError);
-          // Don't fail the whole operation - count is saved to inventoryCounts
-          // But show a warning that dashboard might not update immediately
-          setError('Count saved but failed to update historical records. Dashboard may not reflect changes immediately.');
-        }
-      } else {
-        // This shouldn't happen if session was created properly, but handle it gracefully
-        console.warn('⚠️ Session has no academicTermId and term snapshot. Count saved to session only.', {
-          sessionId,
-          hasTerm: !!session.term,
-          hasTermYear: !!session.termYear,
-          hasAcademicTermId: !!session.academicTermId
+      if (!academicTermId) {
+        setError('Session has no academic term. Please complete the session to link the term.');
+        return;
+      }
+      
+      // Save to historicalCounts (now the single source of truth)
+      // createOrUpdateInventoryCount now handles this, but we call it directly for clarity
+      if (process.env.NODE_ENV === 'development') {
+        console.log('💾 Saving count:', {
+          itemId,
+          academicTermId,
+          quantity,
+          sessionId
         });
-        setError('Count saved to session, but term not linked. Please complete the session to link the term.');
+      }
+      await createOrUpdateHistoricalCount(itemId, academicTermId, quantity, sessionId, user?.uid);
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Count saved successfully');
       }
       
       // Reload counts to get updated data from database
@@ -237,11 +222,8 @@ function CountSessionPageContent() {
       await updateInventorySession(sessionId, { isComplete: true });
       setSession({ ...session, isComplete: true, academicTermId });
 
-      // When a session is completed, push its counts into the historical counts
-      // for the associated academic term so the dashboard reflects the latest data.
-      if (academicTermId) {
-        await syncHistoricalCountsFromSession(sessionId, academicTermId);
-      }
+      // Note: Counts are already saved to historicalCounts when saved during the session
+      // No sync needed anymore since we're using historicalCounts as the single source of truth
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to complete session');
     } finally {

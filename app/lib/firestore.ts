@@ -260,18 +260,6 @@ export async function updateInventorySession(
 }
 
 export async function deleteInventorySession(sessionId: string): Promise<void> {
-  // First, delete all inventoryCounts associated with this session
-  const countsSnapshot = await getDocs(
-    query(getInventoryCountsCollection(), where('sessionId', '==', sessionId))
-  );
-  
-  const deleteCountsPromises = countsSnapshot.docs.map((docSnap) => {
-    const docRef = doc(requireDb(), 'inventoryCounts', docSnap.id);
-    return deleteDoc(docRef);
-  });
-  
-  await Promise.all(deleteCountsPromises);
-  
   // Delete all historicalCounts that were created from this session
   const historicalCountsSnapshot = await getDocs(
     query(getHistoricalCountsCollection(), where('sessionId', '==', sessionId))
@@ -289,55 +277,32 @@ export async function deleteInventorySession(sessionId: string): Promise<void> {
   await deleteDoc(sessionRef);
 }
 
-// Inventory Counts
+// Inventory Counts - DEPRECATED: Now using historicalCounts with sessionId
+// Keeping collection reference for backwards compatibility during migration
 export const getInventoryCountsCollection = () => collection(requireDb(), 'inventoryCounts');
 
-export async function getInventoryCounts(sessionId: string): Promise<InventoryCount[]> {
-  const snapshot = await getDocs(
-    query(getInventoryCountsCollection(), where('sessionId', '==', sessionId))
-  );
-  const counts = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-    countedAt: doc.data().countedAt || Timestamp.now(),
-  })) as InventoryCount[];
-
-  // Sort in memory by itemId so we don't need a composite index in Firestore
-  return counts.sort((a, b) => a.itemId.localeCompare(b.itemId));
-}
-
+// Legacy function - now redirects to historicalCounts
+// Kept for backwards compatibility
 export async function createOrUpdateInventoryCount(
   itemId: string,
   sessionId: string,
   countedQuantity: number,
   countedByUid?: string
 ): Promise<void> {
-  // Check if count already exists
-  const existingQuery = query(
-    getInventoryCountsCollection(),
-    where('itemId', '==', itemId),
-    where('sessionId', '==', sessionId)
-  );
-  const existing = await getDocs(existingQuery);
-
-  if (!existing.empty) {
-    // Update existing
-    const docRef = doc(requireDb(), 'inventoryCounts', existing.docs[0].id);
-    await updateDoc(docRef, {
-      countedQuantity,
-      countedByUid,
-      countedAt: Timestamp.now(),
-    });
-  } else {
-    // Create new
-    await addDoc(getInventoryCountsCollection(), {
-      itemId,
-      sessionId,
-      countedQuantity,
-      countedByUid,
-      countedAt: Timestamp.now(),
-    });
+  // Get the session to find its academicTermId
+  const session = await getInventorySession(sessionId);
+  if (!session || !session.academicTermId) {
+    throw new Error('Session not found or has no academic term');
   }
+  
+  // Save to historicalCounts instead
+  await createOrUpdateHistoricalCount(
+    itemId,
+    session.academicTermId,
+    countedQuantity,
+    sessionId,
+    countedByUid
+  );
 }
 
 // Historical Counts
@@ -376,7 +341,8 @@ export async function createOrUpdateHistoricalCount(
   itemId: string,
   academicTermId: string,
   countedQuantity: number,
-  sessionId?: string
+  sessionId?: string,
+  countedByUid?: string
 ): Promise<void> {
   const existingQuery = query(
     getHistoricalCountsCollection(),
@@ -387,39 +353,49 @@ export async function createOrUpdateHistoricalCount(
 
   if (!existing.empty) {
     const docRef = doc(requireDb(), 'historicalCounts', existing.docs[0].id);
-    await updateDoc(docRef, {
+    const updateData: any = {
       countedQuantity,
       importedAt: Timestamp.now(),
-      sessionId: sessionId || null, // Update sessionId if provided
-    });
+    };
+    if (sessionId) {
+      updateData.sessionId = sessionId;
+    }
+    if (countedByUid) {
+      updateData.countedByUid = countedByUid;
+    }
+    await updateDoc(docRef, updateData);
   } else {
-    await addDoc(getHistoricalCountsCollection(), {
+    const newData: any = {
       itemId,
       academicTermId,
       countedQuantity,
       importedAt: Timestamp.now(),
-      ...(sessionId ? { sessionId } : {}), // Only include sessionId if provided
-    });
+    };
+    if (sessionId) {
+      newData.sessionId = sessionId;
+    }
+    if (countedByUid) {
+      newData.countedByUid = countedByUid;
+    }
+    await addDoc(getHistoricalCountsCollection(), newData);
   }
 }
 
-export async function syncHistoricalCountsFromSession(
-  sessionId: string,
-  academicTermId: string
-): Promise<void> {
-  const countsSnapshot = await getDocs(
-    query(getInventoryCountsCollection(), where('sessionId', '==', sessionId))
+// Get historical counts for a specific session
+export async function getHistoricalCountsBySession(sessionId: string): Promise<HistoricalCount[]> {
+  const snapshot = await getDocs(
+    query(getHistoricalCountsCollection(), where('sessionId', '==', sessionId))
   );
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+    importedAt: doc.data().importedAt || Timestamp.now(),
+  })) as HistoricalCount[];
+}
 
-  const updates = countsSnapshot.docs.map(async (docSnap) => {
-    const data = docSnap.data() as {
-      itemId: string;
-      countedQuantity: number;
-    };
-    return createOrUpdateHistoricalCount(data.itemId, academicTermId, data.countedQuantity, sessionId);
-  });
-
-  await Promise.all(updates);
+// Legacy function - kept for backwards compatibility but now just calls getHistoricalCountsBySession
+export async function getInventoryCounts(sessionId: string): Promise<HistoricalCount[]> {
+  return getHistoricalCountsBySession(sessionId);
 }
 
 // Users Collection
