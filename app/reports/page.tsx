@@ -25,28 +25,8 @@ function ReportsPageContent() {
     }
   }, [user]);
 
-  // Auto-refresh when page becomes visible or window regains focus (e.g., returning from a session)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && user) {
-        loadData();
-      }
-    };
-    
-    const handleFocus = () => {
-      if (user) {
-        loadData();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [user]);
+  // Load data on initial mount only
+  // Manual refresh available via the refresh button
 
   async function loadData() {
     try {
