@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../../lib/firebase';
-import { getInventorySessions } from '../../lib/firestore';
-import type { InventorySession } from '../../types';
+import { auth } from '../lib/firebase';
+import { getInventorySessions } from '../lib/firestore';
+import type { InventorySession } from '../types';
 import Link from 'next/link';
-import AuthGuard from '../../components/AuthGuard';
+import AuthGuard from '../components/AuthGuard';
 
 function SessionsPageContent() {
   const [user] = useAuthState(auth!);
