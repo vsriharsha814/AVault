@@ -259,6 +259,36 @@ export async function updateInventorySession(
   await updateDoc(docRef, updates);
 }
 
+export async function deleteInventorySession(sessionId: string): Promise<void> {
+  // First, delete all inventoryCounts associated with this session
+  const countsSnapshot = await getDocs(
+    query(getInventoryCountsCollection(), where('sessionId', '==', sessionId))
+  );
+  
+  const deleteCountsPromises = countsSnapshot.docs.map((docSnap) => {
+    const docRef = doc(requireDb(), 'inventoryCounts', docSnap.id);
+    return deleteDoc(docRef);
+  });
+  
+  await Promise.all(deleteCountsPromises);
+  
+  // Delete all historicalCounts that were created from this session
+  const historicalCountsSnapshot = await getDocs(
+    query(getHistoricalCountsCollection(), where('sessionId', '==', sessionId))
+  );
+  
+  const deleteHistoricalCountsPromises = historicalCountsSnapshot.docs.map((docSnap) => {
+    const docRef = doc(requireDb(), 'historicalCounts', docSnap.id);
+    return deleteDoc(docRef);
+  });
+  
+  await Promise.all(deleteHistoricalCountsPromises);
+  
+  // Then delete the session itself
+  const sessionRef = doc(requireDb(), 'inventorySessions', sessionId);
+  await deleteDoc(sessionRef);
+}
+
 // Inventory Counts
 export const getInventoryCountsCollection = () => collection(requireDb(), 'inventoryCounts');
 
@@ -345,7 +375,8 @@ export async function createHistoricalCount(
 export async function createOrUpdateHistoricalCount(
   itemId: string,
   academicTermId: string,
-  countedQuantity: number
+  countedQuantity: number,
+  sessionId?: string
 ): Promise<void> {
   const existingQuery = query(
     getHistoricalCountsCollection(),
@@ -359,6 +390,7 @@ export async function createOrUpdateHistoricalCount(
     await updateDoc(docRef, {
       countedQuantity,
       importedAt: Timestamp.now(),
+      sessionId: sessionId || null, // Update sessionId if provided
     });
   } else {
     await addDoc(getHistoricalCountsCollection(), {
@@ -366,6 +398,7 @@ export async function createOrUpdateHistoricalCount(
       academicTermId,
       countedQuantity,
       importedAt: Timestamp.now(),
+      ...(sessionId ? { sessionId } : {}), // Only include sessionId if provided
     });
   }
 }
@@ -383,7 +416,7 @@ export async function syncHistoricalCountsFromSession(
       itemId: string;
       countedQuantity: number;
     };
-    return createOrUpdateHistoricalCount(data.itemId, academicTermId, data.countedQuantity);
+    return createOrUpdateHistoricalCount(data.itemId, academicTermId, data.countedQuantity, sessionId);
   });
 
   await Promise.all(updates);

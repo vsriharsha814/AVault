@@ -166,7 +166,7 @@ function CountSessionPageContent() {
               quantity
             });
           }
-          await createOrUpdateHistoricalCount(itemId, academicTermId, quantity);
+          await createOrUpdateHistoricalCount(itemId, academicTermId, quantity, sessionId);
           if (process.env.NODE_ENV === 'development') {
             console.log('✅ Historical count saved successfully');
           }

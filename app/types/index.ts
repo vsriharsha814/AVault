@@ -35,6 +35,7 @@ export interface HistoricalCount {
   academicTermId: string;
   countedQuantity: number;
   importedAt: Timestamp;
+  sessionId?: string; // Track which session created this historical count
   notes?: string;
 }
 

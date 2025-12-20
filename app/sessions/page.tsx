@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../lib/firebase';
-import { getInventorySessions } from '../lib/firestore';
+import { getInventorySessions, deleteInventorySession } from '../lib/firestore';
 import type { InventorySession } from '../types';
 import Link from 'next/link';
 import AuthGuard from '../components/AuthGuard';
@@ -12,6 +12,8 @@ function SessionsPageContent() {
   const [user] = useAuthState(auth!);
   const [sessions, setSessions] = useState<InventorySession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -26,8 +28,32 @@ function SessionsPageContent() {
       setSessions(sessionsData);
     } catch (error) {
       console.error('Error loading sessions:', error);
+      setError('Failed to load sessions');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDeleteSession(sessionId: string, sessionName: string, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!confirm(`Are you sure you want to delete "${sessionName}"? This will permanently delete the session and all its counts. This action cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingSessionId(sessionId);
+    setError('');
+
+    try {
+      await deleteInventorySession(sessionId);
+      // Reload sessions after deletion
+      await loadSessions();
+    } catch (err) {
+      console.error('Error deleting session:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete session');
+    } finally {
+      setDeletingSessionId(null);
     }
   }
 
@@ -92,44 +118,69 @@ function SessionsPageContent() {
               </Link>
             </div>
           ) : (
-            <div className="space-y-2">
-              {sessions.map((session) => (
-                <Link
-                  key={session.id}
-                  href={`/sessions/${session.id}/count`}
-                  className="group flex items-center justify-between rounded-xl border border-slate-800/50 bg-slate-900/30 backdrop-blur-sm p-3 sm:p-4 transition-all hover:border-slate-700/50 hover:bg-slate-800/30 hover:shadow-md cursor-pointer"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className={`h-2 w-2 rounded-full flex-shrink-0 ${
-                      session.isComplete ? 'bg-emerald-500' : 'bg-yellow-500 animate-pulse'
-                    }`}></div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm sm:text-base font-semibold text-slate-200 truncate">{session.name}</p>
-                      <div className="flex items-center gap-3 mt-1">
-                        <p className="text-xs text-slate-500">
-                          {session.date?.toDate?.().toLocaleDateString() || 'No date'}
-                        </p>
-                        {session.notes && (
-                          <>
-                            <span className="text-slate-600">•</span>
-                            <p className="text-xs text-slate-500 truncate max-w-xs">{session.notes}</p>
-                          </>
-                        )}
+            <>
+              {error && (
+                <div className="mb-4 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400 backdrop-blur-sm">
+                  {error}
+                </div>
+              )}
+              <div className="space-y-2">
+                {sessions.map((session) => (
+                  <div
+                    key={session.id}
+                    className="group flex items-center justify-between rounded-xl border border-slate-800/50 bg-slate-900/30 backdrop-blur-sm p-3 sm:p-4 transition-all hover:border-slate-700/50 hover:bg-slate-800/30 hover:shadow-md"
+                  >
+                    <Link
+                      href={`/sessions/${session.id}/count`}
+                      className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                    >
+                      <div className={`h-2 w-2 rounded-full flex-shrink-0 ${
+                        session.isComplete ? 'bg-emerald-500' : 'bg-yellow-500 animate-pulse'
+                      }`}></div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm sm:text-base font-semibold text-slate-200 truncate">{session.name}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <p className="text-xs text-slate-500">
+                            {session.date?.toDate?.().toLocaleDateString() || 'No date'}
+                          </p>
+                          {session.notes && (
+                            <>
+                              <span className="text-slate-600">•</span>
+                              <p className="text-xs text-slate-500 truncate max-w-xs">{session.notes}</p>
+                            </>
+                          )}
+                        </div>
                       </div>
+                    </Link>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span
+                        className={`rounded-full px-2 sm:px-3 py-1 text-xs font-semibold border ${
+                          session.isComplete
+                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                            : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                        }`}
+                      >
+                        {session.isComplete ? 'Complete' : 'In Progress'}
+                      </span>
+                      <button
+                        onClick={(e) => handleDeleteSession(session.id, session.name, e)}
+                        disabled={deletingSessionId === session.id}
+                        className="rounded-lg px-2 py-1 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                        title="Delete session"
+                      >
+                        {deletingSessionId === session.id ? (
+                          <div className="h-3 w-3 animate-spin rounded-full border-2 border-red-400 border-t-transparent"></div>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        )}
+                      </button>
                     </div>
                   </div>
-                  <span
-                    className={`rounded-full px-2 sm:px-3 py-1 text-xs font-semibold border flex-shrink-0 ${
-                      session.isComplete
-                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                        : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-                    }`}
-                  >
-                    {session.isComplete ? 'Complete' : 'In Progress'}
-                  </span>
-                </Link>
-              ))}
-            </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
